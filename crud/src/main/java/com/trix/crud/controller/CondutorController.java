@@ -1,9 +1,9 @@
 package com.trix.crud.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.service.CondutorService;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/condutores")
@@ -25,28 +26,32 @@ public class CondutorController {
     CondutorService service;
 
     @PostMapping("/cadastrocondutor")
-    public void cadastrar(@RequestBody NovoCondutor novoCondutor){
-        service.cadastraNovoCondutor(novoCondutor);
+    public ResponseEntity cadastrar(@RequestBody NovoCondutor novoCondutor, UriComponentsBuilder uriBuilder){
+        if(service.cadastraNovoCondutor(novoCondutor)){
+            var uri = uriBuilder.path("/condutores/cadastrocondutor").build(novoCondutor);
+            return ResponseEntity.created(uri).body("Condutor cadastrado com sucesso!");
+        }
+        return ResponseEntity.ok("Cadastro não realizado! Verifique os campos e tente novamente.");
     }
 
     @GetMapping
-    public List<Condutor> listaCondutores(){
-        return service.consultaTodosCondutores();
+    public ResponseEntity<Iterable<Condutor>> listaCondutores(){
+        return ResponseEntity.ok(service.consultaTodosCondutores());
     }
 
-    @GetMapping("/buscacondutor")
-    public Optional<Condutor> buscaCondutor(String cnh){
+    @GetMapping("/buscacondutor/{cnh}")
+    public ResponseEntity buscaCondutor(@PathVariable String cnh){
         return service.consultaCondutorcnh(cnh);
     }
 
     @PutMapping("/alteracondutor")
-    public void alterar(@RequestBody Condutor condutor){
-        service.alteraCondutor(condutor);
+    public ResponseEntity alterar(@RequestBody Condutor condutor){
+        return service.alteraCondutor(condutor);
     }
 
-    @DeleteMapping("/deletacondutor")
-    public void deletar(@RequestBody String cnh){
-        service.deletaCondutor(cnh);
+    @DeleteMapping("/deletacondutor/{cnh}")
+    public ResponseEntity deletar(@PathVariable String cnh){
+        return service.deletaCondutor(cnh);
     }
 
     @GetMapping("/condutor/{nome_condutor}")
