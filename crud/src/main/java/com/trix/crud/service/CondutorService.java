@@ -1,9 +1,13 @@
 package com.trix.crud.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.trix.crud.modelo.Veiculo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.trix.crud.dto.NovoCondutor;
@@ -16,30 +20,52 @@ public class CondutorService {
     @Autowired
     CondutorRepository repository;
 
-    public void cadastraNovoCondutor(NovoCondutor novoCondutor){
+    public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
         Condutor condutor = new Condutor();
-        condutor.setNomeCondutor(novoCondutor.getNome());
-        condutor.setNumeroCnh(novoCondutor.getNumCnh());
-        
-        repository.save(condutor);
+        if(verificaCnhCondutor(novoCondutor.getNumCnh()) && verificaNomeCondutor(novoCondutor.getNome())){
+            condutor.setNomeCondutor(novoCondutor.getNome());
+            condutor.setNumeroCnh(novoCondutor.getNumCnh());
+            condutor.setListaDeVeiculos(new ArrayList<>());
+            repository.save(condutor);
+            return true;
+        }else{
+            return false;
+        }
     }
 
-    public List<Condutor> consultaTodosCondutores(){
-        return (List<Condutor>) repository.findAll();
+    public Iterable<Condutor> consultaTodosCondutores(){
+        return repository.findAll();
     }
 
-    public Optional<Condutor> consultaCondutorcnh(String cnh){
-        return repository.findById(cnh);
+    public ResponseEntity consultaCondutorcnh(String cnh){
+        if(verificaCnhCondutor(cnh)){
+            if(repository.findById(cnh).isPresent())
+                return ResponseEntity.ok(repository.findById(cnh).get());
+            else{
+                return ResponseEntity.ok("Condutor não encontrado!");
+            }
+        }
+            return ResponseEntity.ok("CNH informada não é válida!");
     }
 
-    public void alteraCondutor(Condutor condutor){
-       Condutor existente = consultaCondutorcnh(condutor.getNumeroCnh()).get();
-       existente.setNomeCondutor(condutor.getNomeCondutor());
-       repository.save(existente);
+    public ResponseEntity alteraCondutor(Condutor condutor){
+       Condutor existente = repository.findById(condutor.getNumeroCnh()).get();
+       if(verificaNomeCondutor(condutor.getNomeCondutor())){
+           existente.setNomeCondutor(condutor.getNomeCondutor());
+           repository.save(existente);
+           return ResponseEntity.ok("Alterações salvas com sucesso!");
+       }
+       return ResponseEntity.ok("Houve um problema ao salvar as alterações");
     }
 
-    public void deletaCondutor(String cnh){
-        repository.deleteById(cnh);
+    public ResponseEntity deletaCondutor(String cnh){
+        if(verificaCnhCondutor(cnh) && repository.findById(cnh).isPresent()){
+            repository.deleteById(cnh);
+            return ResponseEntity.noContent().build();
+        }else{
+            return ResponseEntity.ok("Houve um problema na hora de remover o condutor");
+        }
+
     }
 
     public void addVeiculoCondutor(Condutor condutor){
@@ -59,6 +85,18 @@ public class CondutorService {
             return repository.findByNomeCondutorContaining(nomeCondutor);
         }
     }
+
+    private boolean verificaCnhCondutor(String cnh){
+        if(cnh.matches("(?=.*[0-9]).{11}")){
+                return true;
+        }
+        return false;
+    }
   
-    
+    private boolean verificaNomeCondutor(String nome){
+        if(!nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}")){
+            return true;
+        }
+        return false;
+    }
 }
