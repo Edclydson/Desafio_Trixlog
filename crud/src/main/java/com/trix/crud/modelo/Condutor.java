@@ -1,6 +1,9 @@
 package com.trix.crud.modelo;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 import javax.persistence.Column;
@@ -9,7 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
+@Getter
+@Setter
 @Entity
 @Table(name="condutores")
 public class Condutor {
@@ -22,25 +26,5 @@ public class Condutor {
 
     @OneToMany
     private List<Veiculo> listaDeVeiculos;
-    
-    public List<Veiculo> getListaDeVeiculos() {
-        return listaDeVeiculos;
-    }
-    public void setListaDeVeiculos(List<Veiculo> listaDeVeiculos) {
-        this.listaDeVeiculos = listaDeVeiculos;
-    }
-    public String getNomeCondutor() {
-        return nomeCondutor;
-    }
-    public void setNomeCondutor(String nomeCondutor) {
-        this.nomeCondutor = nomeCondutor;
-    }
-    public String getNumeroCnh() {
-        return numeroCnh;
-    }
-    public void setNumeroCnh(String numeroCnh) {
-        this.numeroCnh = numeroCnh;
-    }
-
 
 }
