@@ -1,11 +1,7 @@
 package com.trix.crud.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import com.trix.crud.modelo.Veiculo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,12 +17,8 @@ public class CondutorService {
     CondutorRepository repository;
 
     public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
-        Condutor condutor = new Condutor();
         if(verificaCnhCondutor(novoCondutor.getNumCnh()) && verificaNomeCondutor(novoCondutor.getNome())){
-            condutor.setNomeCondutor(novoCondutor.getNome());
-            condutor.setNumeroCnh(novoCondutor.getNumCnh());
-            condutor.setListaDeVeiculos(new ArrayList<>());
-            repository.save(condutor);
+            repository.save(geraCondutor(novoCondutor));
             return true;
         }else{
             return false;
@@ -49,10 +41,8 @@ public class CondutorService {
     }
 
     public ResponseEntity alteraCondutor(Condutor condutor){
-       Condutor existente = repository.findById(condutor.getNumeroCnh()).get();
        if(verificaNomeCondutor(condutor.getNomeCondutor())){
-           existente.setNomeCondutor(condutor.getNomeCondutor());
-           repository.save(existente);
+           repository.save(alteracaoCondutor(condutor));
            return ResponseEntity.ok("Alterações salvas com sucesso!");
        }
        return ResponseEntity.ok("Houve um problema ao salvar as alterações");
@@ -76,14 +66,14 @@ public class CondutorService {
         repository.save(condutor);
     }
 
-    public List<Condutor> buscaNomeCondutor(String nomeCondutor){
-        if(nomeCondutor.contains(" ") == true){
-            return repository.findByNomeCondutor(nomeCondutor);
+    public ResponseEntity buscaNomeCondutor(String nomeCondutor){
+        if(verificaNomeCondutor(nomeCondutor)){
+            if(nomeCondutor.contains(" ")){
+                return ResponseEntity.ok(repository.findByNomeCondutor(nomeCondutor));
+            }
+            return ResponseEntity.ok(repository.findByNomeCondutorContaining(nomeCondutor));
         }
-        else
-        {
-            return repository.findByNomeCondutorContaining(nomeCondutor);
-        }
+        return ResponseEntity.ok("Nome inválido!");
     }
 
     private boolean verificaCnhCondutor(String cnh){
@@ -98,5 +88,20 @@ public class CondutorService {
             return true;
         }
         return false;
+    }
+
+    private Condutor geraCondutor(NovoCondutor novoCondutor){
+        Condutor condutor = new Condutor();
+        condutor.setNomeCondutor(novoCondutor.getNome());
+        condutor.setNumeroCnh(novoCondutor.getNumCnh());
+        condutor.setListaDeVeiculos(new ArrayList<>());
+        return condutor;
+
+    }
+
+    private Condutor alteracaoCondutor(Condutor condutorComAlteracao){
+        Condutor existente = repository.findById(condutorComAlteracao.getNumeroCnh()).get();
+        existente.setNomeCondutor(condutorComAlteracao.getNomeCondutor());
+        return existente;
     }
 }
