@@ -1,6 +1,5 @@
 package com.trix.crud.controller;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +54,7 @@ public class CondutorController {
     }
 
     @GetMapping("/condutor/{nome_condutor}")
-    public List<Condutor> buscanomeCondutor(@PathVariable String nomeCondutor){
+    public ResponseEntity buscanomeCondutor(@PathVariable("nome_condutor") String nomeCondutor){
         return service.buscaNomeCondutor(nomeCondutor);
     }
 }
