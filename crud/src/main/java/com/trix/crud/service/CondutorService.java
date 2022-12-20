@@ -1,14 +1,15 @@
 package com.trix.crud.service;
 
-import java.util.*;
-
+import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.modelo.Condutor;
+import com.trix.crud.repository.CondutorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.trix.crud.dto.NovoCondutor;
-import com.trix.crud.modelo.Condutor;
-import com.trix.crud.repository.CondutorRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class CondutorService {
@@ -25,8 +26,11 @@ public class CondutorService {
         }
     }
 
-    public Iterable<Condutor> consultaTodosCondutores(){
-        return repository.findAll();
+    public List<Condutor> consultaTodosCondutores(){
+        try{
+            return (List<Condutor>) repository.findAll();
+        }catch (ClassCastException e ){e.printStackTrace();}
+        return Collections.emptyList();
     }
 
     public ResponseEntity consultaCondutorcnh(String cnh){
@@ -77,14 +81,14 @@ public class CondutorService {
     }
 
     private boolean verificaCnhCondutor(String cnh){
-        if(cnh.matches("(?=.*[0-9]).{11}")){
+        if(cnh.matches("(?=.*[0-9]).{11}") && !cnh.matches("(?=.*[a-zA-Z]).{1,}")){
                 return true;
         }
         return false;
     }
   
     private boolean verificaNomeCondutor(String nome){
-        if(!nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}")){
+        if(!nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}") && !nome.matches("(?=.*[0-9]).{1,}")){
             return true;
         }
         return false;
