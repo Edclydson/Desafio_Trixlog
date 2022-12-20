@@ -17,6 +17,8 @@ import com.trix.crud.modelo.Condutor;
 import com.trix.crud.service.CondutorService;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/condutores")
 public class CondutorController {
@@ -34,7 +36,7 @@ public class CondutorController {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Condutor>> listaCondutores(){
+    public ResponseEntity<List<Condutor>> listaCondutores(){
         return ResponseEntity.ok(service.consultaTodosCondutores());
     }
 
