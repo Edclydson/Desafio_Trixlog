@@ -81,14 +81,14 @@ public class CondutorService {
     }
 
     private boolean verificaCnhCondutor(String cnh){
-        if(cnh.matches("(?=.*[0-9]).{11}") && !cnh.matches("(?=.*[a-zA-Z]).{1,}")){
+        if(cnh.matches("(?=.*\\d).{11}") && !cnh.matches("(?=.*[a-zA-Z]).+")){
                 return true;
         }
         return false;
     }
   
     private boolean verificaNomeCondutor(String nome){
-        if(!nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}") && !nome.matches("(?=.*[0-9]).{1,}")){
+        if(!nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}") && !nome.matches("(?=.*\\d).+")){
             return true;
         }
         return false;
