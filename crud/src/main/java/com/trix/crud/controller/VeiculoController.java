@@ -1,21 +1,13 @@
 package com.trix.crud.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.service.VeiculoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/veiculos")
@@ -30,12 +22,12 @@ public class VeiculoController {
     }
 
     @GetMapping
-    public List<Veiculo> listaVeiculos(){
-        return service.findAll();
+    public ResponseEntity<List<Veiculo>> listaVeiculos(){
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{renavam}")
-    public Optional<Veiculo> buscaveiculo(String renavam){
+    public ResponseEntity buscaveiculo(@PathVariable String renavam){
         return service.buscaveiculo(renavam);
     }
 
@@ -51,7 +43,7 @@ public class VeiculoController {
 
 
     @GetMapping("/placa/{uf}")
-    public List<Veiculo> buscaufplaca(@PathVariable String uf){
+    public ResponseEntity buscaufplaca(@PathVariable String uf){
         return service.buscaveiculoufplaca(uf);
     }
     
