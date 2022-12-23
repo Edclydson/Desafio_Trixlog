@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class VeiculoService {
+public class VeiculoService implements iVeiculo{
 
     @Autowired
     VeiculoRepository repository;
@@ -25,8 +25,9 @@ public class VeiculoService {
     @Autowired
     CondutorService condutorS;
 
-    public void registraNovoVeiculo(NovoVeiculo novoVeiculo){
-//        if(buscaveiculo(novoVeiculo.getRenavamNovoVeiculo()).isPresent() == false){
+    @Override
+    public ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo) {
+        //        if(buscaveiculo(novoVeiculo.getRenavamNovoVeiculo()).isPresent() == false){
 //
 //            Veiculo veiculo = new Veiculo();
 //            veiculo.setRenavam(novoVeiculo.getRenavamNovoVeiculo());
@@ -53,18 +54,22 @@ public class VeiculoService {
 //                condutorS.addVeiculoCondutor(condutorComVeiculo);
 //            }
 //        }
-    }    
 
-    public List<Veiculo> findAll(){
+        return null;
+    }
+
+    @Override
+    public List<Veiculo> findAll() throws ClassCastException{
         try{
             return (List<Veiculo>) repository.findAll();
         }catch (ClassCastException e){e.printStackTrace();}
         return Collections.emptyList();
     }
 
-    public ResponseEntity buscaveiculo(String renavam){
+    @Override
+    public ResponseEntity buscaVeiculoComRenavam(String renavam) {
         if(validaRenavam(renavam)){
-            if (repository.findById(renavam).isPresent()){
+            if(repository.findById(renavam).isPresent()){
                 return ResponseEntity.ok(repository.findById(renavam));
             } else {
                 return ResponseEntity.ok("Veículo não encontrado!");
@@ -73,42 +78,11 @@ public class VeiculoService {
         return ResponseEntity.ok("O renavam " + renavam + " não é válido!");
     }
 
-    public void alteraveiculo(Veiculo veiculo){        
-            Veiculo existente = repository.findById(veiculo.getRenavam()).get();
-            String condutorApagar = existente.getCnhCondutor();
-            existente.setPlaca(veiculo.getPlaca());
-            existente.setChassi(veiculo.getChassi());
-            existente.setAnoModelo(veiculo.getAnoModelo());
-            existente.setAnoFabricacao(veiculo.getAnoFabricacao());
-            existente.setCor(veiculo.getCor());
-            existente.setUfPlaca(veiculo.getUfPlaca());
-            existente.setDataAquisicao(veiculo.getDataAquisicao());
-            existente.setNomeCondutor(veiculo.getNomeCondutor());
-            existente.setCnhCondutor(veiculo.getCnhCondutor());
-            existente.setRenavam(veiculo.getRenavam());
-
-            if((existente.getCnhCondutor().equals("") && existente.getNomeCondutor().equals("")) ){
-                Condutor condutorsemV = condutorRepository.findById(condutorApagar).get();
-                condutorsemV.getListaDeVeiculos().remove(existente);
-                condutorS.rmvVeiculoCondutor(condutorsemV);
-            }else{
-                Condutor condutorComVeiculo = condutorRepository.findById(veiculo.getCnhCondutor()).get();
-                condutorComVeiculo.getListaDeVeiculos().add(veiculo);
-                condutorS.addVeiculoCondutor(condutorComVeiculo);
-            }
-            
-            
-            repository.save(existente);
-    }
-
-    public void deletaveiculo(String renavam){
-        repository.deleteById(renavam);
-    }
-
-    public ResponseEntity buscaveiculoufplaca(String uf){
-        uf = uf.toUpperCase();
-        if(validaUf(uf) && ufExistente(uf)){
-            List<Veiculo> resposta = repository.findByufPlaca(uf);
+    @Override
+    public ResponseEntity buscaVeiculoComUfDaPlaca(String ufDaPlaca) {
+        ufDaPlaca = ufDaPlaca.toUpperCase();
+        if(validaUf(ufDaPlaca) && ufExistente(ufDaPlaca)){
+            List<Veiculo> resposta = repository.findByufPlaca(ufDaPlaca);
             if(!resposta.isEmpty()){
                 return ResponseEntity.ok(resposta);
             }
@@ -117,37 +91,90 @@ public class VeiculoService {
         return ResponseEntity.ok("Digite uma localidade válida");
     }
 
-    public List<Veiculo> buscaplaca(String placa){
-        if(placa.length() < 7){
-            return repository.findByPlacaContaining(placa);
+    @Override
+    public ResponseEntity buscaVeiculoComPlaca(String placa) {
+        if(verificaTamanhoDaPlaca(placa)){
+            return (validaPlaca(placa)) ? ResponseEntity.ok(repository.findByPlaca(placa)):
+                    ResponseEntity.ok("Não encontramos nenhum veículo");
         }
         else{
-            return repository.findByPlaca(placa);
+            List<Veiculo> resposta = repository.findByPlacaContaining(placa);
+            return !resposta.isEmpty() ?
+                    ResponseEntity.ok(resposta) :
+                    ResponseEntity.ok("Não encontramos nenhum veículo");
         }
     }
 
-    public List<Veiculo> intervaloaquisicao(String datainicio, String datafim){
-        return repository.findByintevalo(datainicio, datafim);
+    @Override
+    public ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal) {
+        //return repository.findByintevalo(datainicio, datafim);
+        return null;
     }
 
+    @Override
+    public ResponseEntity alterarDadosVeiculo(Veiculo veiculo) {
+        Veiculo existente = repository.findById(veiculo.getRenavam()).get();
+        String condutorApagar = existente.getCnhCondutor();
+        existente.setPlaca(veiculo.getPlaca());
+        existente.setChassi(veiculo.getChassi());
+        existente.setAnoModelo(veiculo.getAnoModelo());
+        existente.setAnoFabricacao(veiculo.getAnoFabricacao());
+        existente.setCor(veiculo.getCor());
+        existente.setUfPlaca(veiculo.getUfPlaca());
+        existente.setDataAquisicao(veiculo.getDataAquisicao());
+        existente.setNomeCondutor(veiculo.getNomeCondutor());
+        existente.setCnhCondutor(veiculo.getCnhCondutor());
+        existente.setRenavam(veiculo.getRenavam());
 
-    private boolean validaRenavam(String renavam){
-        if(renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z]).+")){
-            return true;
+        if((existente.getCnhCondutor().equals("") && existente.getNomeCondutor().equals("")) ){
+            Condutor condutorsemV = condutorRepository.findById(condutorApagar).get();
+            condutorsemV.getListaDeVeiculos().remove(existente);
+            condutorS.rmvVeiculoCondutor(condutorsemV);
+        }else{
+            Condutor condutorComVeiculo = condutorRepository.findById(veiculo.getCnhCondutor()).get();
+            condutorComVeiculo.getListaDeVeiculos().add(veiculo);
+            condutorS.addVeiculoCondutor(condutorComVeiculo);
         }
-        return false;
+
+
+        repository.save(existente);
+        return null;
     }
 
-    private boolean validaUf(String uf){
+    @Override
+    public ResponseEntity deletarVeiculo(String renavam) {
+        //repository.deleteById(renavam);
+        return null;
+    }
+
+    @Override
+    public boolean validaRenavam(String renavam){
+        return renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z]).+");
+    }
+
+
+    @Override
+    public boolean validaUf(String uf) {
         return !uf.matches("(?=.*\\d).+") && uf.matches("(?=.*[a-zA-Z]).{2}");
     }
 
-    private boolean ufExistente(String uf){
+    @Override
+    public boolean ufExistente(String uf) {
         for(Uf existente: Uf.values()){
             if(existente.toString().equals(uf)){
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean validaPlaca(String placaVeiculo) {
+        return placaVeiculo.matches("[A-Z]{3}\\d[A-Z]\\d{2}|[A-Z]{3}\\d{4}");
+    }
+
+    @Override
+    public boolean verificaTamanhoDaPlaca(String placaVeiculo){
+        return placaVeiculo.length() == 7;
     }
 }
