@@ -27,7 +27,7 @@ public class VeiculoController {
     }
 
     @GetMapping("/{renavam}")
-    public ResponseEntity buscaveiculo(@PathVariable String renavam){
+    public ResponseEntity buscaveiculo(@PathVariable("renavam") String renavam){
         return service.buscaVeiculoComRenavam(renavam);
     }
 
@@ -36,9 +36,9 @@ public class VeiculoController {
         service.alterarDadosVeiculo(veiculo);
     }
 
-    @DeleteMapping("/deletaveiculo")
-    public void deletarveiculo(@RequestBody String renavam){
-        service.deletarVeiculo(renavam);
+    @DeleteMapping("/deletaveiculo/{renavam}")
+    public ResponseEntity deletarveiculo(@PathVariable("renavam") String renavam){
+       return service.deletarVeiculo(renavam);
     }
 
 
