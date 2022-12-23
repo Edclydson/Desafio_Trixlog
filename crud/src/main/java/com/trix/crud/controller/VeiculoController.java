@@ -18,7 +18,7 @@ public class VeiculoController {
 
     @PostMapping("/cadastraveiculo")
     public void cadastraNovoVeiculo(@RequestBody NovoVeiculo novoVeiculo){
-        service.registraNovoVeiculo(novoVeiculo);
+        service.cadastrarNovoVeiculo(novoVeiculo);
     }
 
     @GetMapping
@@ -28,32 +28,33 @@ public class VeiculoController {
 
     @GetMapping("/{renavam}")
     public ResponseEntity buscaveiculo(@PathVariable String renavam){
-        return service.buscaveiculo(renavam);
+        return service.buscaVeiculoComRenavam(renavam);
     }
 
     @PutMapping("/alteraveiculo")
     public void alterarveiculo(@RequestBody Veiculo veiculo){
-        service.alteraveiculo(veiculo);
+        service.alterarDadosVeiculo(veiculo);
     }
 
     @DeleteMapping("/deletaveiculo")
     public void deletarveiculo(@RequestBody String renavam){
-        service.deletaveiculo(renavam);
+        service.deletarVeiculo(renavam);
     }
 
 
     @GetMapping("/placa/{uf}")
     public ResponseEntity buscaufplaca(@PathVariable String uf){
-        return service.buscaveiculoufplaca(uf);
+        return service.buscaVeiculoComUfDaPlaca(uf);
     }
     
-    @GetMapping("/veiculo/{placa}")
-    public List<Veiculo> buscaplaca(@PathVariable String placa){
-        return service.buscaplaca(placa);
+    @GetMapping("/buscaplaca/{placa}")
+    public ResponseEntity buscaplaca(@PathVariable String placa) {
+        return service.buscaVeiculoComPlaca(placa);
     }
 
     @GetMapping("/intervaloaquisicao/{datainicio}/{datafim}")
-    public List<Veiculo> intervalodataaquisicao(@PathVariable String datainicio, @PathVariable String datafim){
-        return service.intervaloaquisicao(datainicio, datafim);
+    public List<Veiculo> intervalodataaquisicao(@PathVariable("datainicio") String datainicio,
+                                                @PathVariable("datafim") String datafim){
+        return null;//service.buscaVeiculosComIntervaloAquisicao(datainicio, datafim).getBody();
     }
 }
