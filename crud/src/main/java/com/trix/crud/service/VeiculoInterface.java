@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface iVeiculo{
+public interface VeiculoInterface{
     ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo);
 
     List<Veiculo> findAll();
