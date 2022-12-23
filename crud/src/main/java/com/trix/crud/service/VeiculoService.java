@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class VeiculoService implements iVeiculo{
+public class VeiculoService implements VeiculoInterface{
 
     @Autowired
     VeiculoRepository repository;
@@ -143,8 +143,14 @@ public class VeiculoService implements iVeiculo{
 
     @Override
     public ResponseEntity deletarVeiculo(String renavam) {
-        //repository.deleteById(renavam);
-        return null;
+        if(validaRenavam(renavam)){
+            if(repository.findById(renavam).isPresent()){
+                repository.deleteById(renavam);
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok("Informe um renavam válido!");
     }
 
     @Override
