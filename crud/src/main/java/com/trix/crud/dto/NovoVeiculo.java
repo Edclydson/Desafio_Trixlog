@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NovoVeiculo {
-    private String renavamNovoVeiculo; 
+public class VeiculoDTO {
+    private String renavamNovoVeiculo;
 
     private String placaNovoVeiculo;
     private String chassiNovoVeiculo;

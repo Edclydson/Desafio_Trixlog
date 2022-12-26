@@ -4,11 +4,14 @@ import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Veiculo;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
 import java.util.List;
 
 public interface VeiculoInterface{
-    
-    ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo);
+
+    ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri);
+
+    Veiculo criaVeiculo(NovoVeiculo novoVeiculo);
 
     List<Veiculo> findAll();
 
@@ -18,19 +21,14 @@ public interface VeiculoInterface{
 
     ResponseEntity buscaVeiculoComPlaca(String placa);
 
-    ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial,String dataFinal);
+    ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal);
 
-    ResponseEntity alterarDadosVeiculo(Veiculo veiculo);
+    ResponseEntity alterarDadosVeiculo(NovoVeiculo veiculo);
 
     ResponseEntity deletarVeiculo(String renavam);
 
-    boolean validaPlaca(String placaVeiculo);
+    Veiculo atualizacaoDados(NovoVeiculo veiculo, Veiculo existente);
 
-    boolean verificaTamanhoDaPlaca(String placaVeiculo);
 
-    boolean validaRenavam(String renavam);
 
-    boolean validaUf(String uf);
-
-    boolean ufExistente(String uf);
 }
