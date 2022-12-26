@@ -3,6 +3,8 @@ package com.trix.crud.service;
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.repository.CondutorRepository;
+import com.trix.crud.service.interfaces.CondutorInterface;
+import com.trix.crud.service.interfaces.ValidacoesCondutorInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,11 +14,12 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class CondutorService {
+public class CondutorService implements CondutorInterface, ValidacoesCondutorInterface{
 
     @Autowired
     CondutorRepository repository;
 
+    @Override
     public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
         if(verificaCnhCondutor(novoCondutor.getNumCnh()) && verificaNomeCondutor(novoCondutor.getNome())){
             repository.save(geraCondutor(novoCondutor));
@@ -26,6 +29,7 @@ public class CondutorService {
         }
     }
 
+    @Override
     public List<Condutor> consultaTodosCondutores(){
         try{
             return (List<Condutor>) repository.findAll();
@@ -33,6 +37,7 @@ public class CondutorService {
         return Collections.emptyList();
     }
 
+    @Override
     public ResponseEntity consultaCondutorcnh(String cnh){
         if(verificaCnhCondutor(cnh)){
             if(repository.findById(cnh).isPresent())
@@ -44,6 +49,7 @@ public class CondutorService {
             return ResponseEntity.ok("CNH informada não é válida!");
     }
 
+    @Override
     public ResponseEntity alteraCondutor(Condutor condutor){
        if(verificaNomeCondutor(condutor.getNomeCondutor())){
            repository.save(alteracaoCondutor(condutor));
@@ -52,6 +58,7 @@ public class CondutorService {
        return ResponseEntity.ok("Houve um problema ao salvar as alterações");
     }
 
+    @Override
     public ResponseEntity deletaCondutor(String cnh){
         if(verificaCnhCondutor(cnh) && repository.findById(cnh).isPresent()){
             repository.deleteById(cnh);
@@ -70,6 +77,7 @@ public class CondutorService {
         repository.save(condutor);
     }
 
+    @Override
     public ResponseEntity buscaNomeCondutor(String nomeCondutor){
         if(verificaNomeCondutor(nomeCondutor)){
             if(nomeCondutor.contains(" ")){
@@ -80,15 +88,18 @@ public class CondutorService {
         return ResponseEntity.ok("Nome inválido!");
     }
 
-    private boolean verificaCnhCondutor(String cnh){
+    @Override
+    public boolean verificaCnhCondutor(String cnh){
         return cnh.matches("(?=.*\\d).{11}") && !cnh.matches("(?=.*[a-zA-Z]).+");
     }
-  
-    private boolean verificaNomeCondutor(String nome){
+
+    @Override
+    public boolean verificaNomeCondutor(String nome){
         return !nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}") && !nome.matches("(?=.*\\d).+");
     }
 
-    private Condutor geraCondutor(NovoCondutor novoCondutor){
+    @Override
+    public Condutor geraCondutor(NovoCondutor novoCondutor){
         Condutor condutor = new Condutor();
         condutor.setNomeCondutor(novoCondutor.getNome());
         condutor.setNumeroCnh(novoCondutor.getNumCnh());
@@ -97,7 +108,8 @@ public class CondutorService {
 
     }
 
-    private Condutor alteracaoCondutor(Condutor condutorComAlteracao){
+    @Override
+    public Condutor alteracaoCondutor(Condutor condutorComAlteracao){
         Condutor existente = repository.findById(condutorComAlteracao.getNumeroCnh()).get();
         existente.setNomeCondutor(condutorComAlteracao.getNomeCondutor());
         return existente;
