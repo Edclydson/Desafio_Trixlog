@@ -1,61 +1,53 @@
 package com.trix.crud.service;
 
 import com.trix.crud.dto.NovoVeiculo;
-import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Uf;
 import com.trix.crud.modelo.Veiculo;
-import com.trix.crud.repository.CondutorRepository;
 import com.trix.crud.repository.VeiculoRepository;
+import com.trix.crud.service.interfaces.ValidacoesVeiculosInterface;
+import com.trix.crud.service.interfaces.VeiculoInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
 @Service
-public class VeiculoService implements VeiculoInterface{
+public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInterface{
 
     @Autowired
     VeiculoRepository repository;
 
-    @Autowired
-    CondutorRepository condutorRepository;
+    @Override
+    public ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri) {
+        if(validacoesParaCadastroVeiculo(
+                novoVeiculo.getRenavamNovoVeiculo(),
+                novoVeiculo.getPlacaNovoVeiculo(),
+                novoVeiculo.getUfPlacaNovoVeiculo())
+        ){
+            repository.save(criaVeiculo(novoVeiculo));
+            return ResponseEntity.created(uri).build();
+        }
 
-    @Autowired
-    CondutorService condutorS;
+        return ResponseEntity.ok("Cadastro não realizado!");
+    }
 
     @Override
-    public ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo) {
-        //        if(buscaveiculo(novoVeiculo.getRenavamNovoVeiculo()).isPresent() == false){
-//
-//            Veiculo veiculo = new Veiculo();
-//            veiculo.setRenavam(novoVeiculo.getRenavamNovoVeiculo());
-//            veiculo.setChassi(novoVeiculo.getChassiNovoVeiculo().toUpperCase());
-//            veiculo.setUfPlaca(novoVeiculo.getUfPlacaNovoVeiculo());
-//            veiculo.setPlaca(novoVeiculo.getPlacaNovoVeiculo());
-//            veiculo.setAnoFabricacao(novoVeiculo.getAnoFabricacaoNovoVeiculo());
-//            veiculo.setAnoModelo(novoVeiculo.getAnoModeloNovoVeiculo());
-//            veiculo.setDataAquisicao(novoVeiculo.getDataAquisicaoNovoVeiculo());
-//            veiculo.setCor(novoVeiculo.getCorNovoVeiculo());
-//
-//            if(novoVeiculo.getCnhCondutorNovoVeiculo().equals("") && novoVeiculo.getNomeCondutorNovoVeiculo().equals("")){
-//                veiculo.setCnhCondutor("");
-//                veiculo.setNomeCondutor("");
-//                repository.save(veiculo);
-//            }
-//            else{
-//                veiculo.setCnhCondutor(novoVeiculo.getCnhCondutorNovoVeiculo());
-//                veiculo.setNomeCondutor(novoVeiculo.getNomeCondutorNovoVeiculo());
-//                repository.save(veiculo);
-//
-//                Condutor condutorComVeiculo = condutorRepository.findById(novoVeiculo.getCnhCondutorNovoVeiculo()).get();
-//                condutorComVeiculo.getListaDeVeiculos().add(veiculo);
-//                condutorS.addVeiculoCondutor(condutorComVeiculo);
-//            }
-//        }
+    public Veiculo criaVeiculo(NovoVeiculo novoVeiculo) {
 
-        return null;
+        Veiculo veiculo = new Veiculo();
+        veiculo.setRenavam(novoVeiculo.getRenavamNovoVeiculo());
+        veiculo.setChassi(novoVeiculo.getChassiNovoVeiculo().toUpperCase());
+        veiculo.setUfPlaca(novoVeiculo.getUfPlacaNovoVeiculo().toUpperCase());
+        veiculo.setPlaca(novoVeiculo.getPlacaNovoVeiculo());
+        veiculo.setAnoFabricacao(novoVeiculo.getAnoFabricacaoNovoVeiculo());
+        veiculo.setAnoModelo(novoVeiculo.getAnoModeloNovoVeiculo());
+        veiculo.setDataAquisicao(novoVeiculo.getDataAquisicaoNovoVeiculo());
+        veiculo.setCor(novoVeiculo.getCorNovoVeiculo());
+        veiculo.setCnhCondutor("");
+        return veiculo;
     }
 
     @Override
@@ -112,33 +104,27 @@ public class VeiculoService implements VeiculoInterface{
     }
 
     @Override
-    public ResponseEntity alterarDadosVeiculo(Veiculo veiculo) {
-        Veiculo existente = repository.findById(veiculo.getRenavam()).get();
-        String condutorApagar = existente.getCnhCondutor();
-        existente.setPlaca(veiculo.getPlaca());
-        existente.setChassi(veiculo.getChassi());
-        existente.setAnoModelo(veiculo.getAnoModelo());
-        existente.setAnoFabricacao(veiculo.getAnoFabricacao());
-        existente.setCor(veiculo.getCor());
-        existente.setUfPlaca(veiculo.getUfPlaca());
-        existente.setDataAquisicao(veiculo.getDataAquisicao());
-        existente.setNomeCondutor(veiculo.getNomeCondutor());
-        existente.setCnhCondutor(veiculo.getCnhCondutor());
-        existente.setRenavam(veiculo.getRenavam());
-
-        if((existente.getCnhCondutor().equals("") && existente.getNomeCondutor().equals("")) ){
-            Condutor condutorsemV = condutorRepository.findById(condutorApagar).get();
-            condutorsemV.getListaDeVeiculos().remove(existente);
-            condutorS.rmvVeiculoCondutor(condutorsemV);
-        }else{
-            Condutor condutorComVeiculo = condutorRepository.findById(veiculo.getCnhCondutor()).get();
-            condutorComVeiculo.getListaDeVeiculos().add(veiculo);
-            condutorS.addVeiculoCondutor(condutorComVeiculo);
+    public ResponseEntity alterarDadosVeiculo(NovoVeiculo veiculo) {
+        if(repository.findById(veiculo.getRenavamNovoVeiculo()).isPresent()){
+            Veiculo existente = repository.findById(veiculo.getRenavamNovoVeiculo()).get();
+            repository.save(atualizacaoDados(veiculo,existente));
+            return ResponseEntity.ok("Alterações salvas com sucesso");
         }
+        return ResponseEntity.ok("Não existe nenhum veiculo com o renavam informado!");
+    }
 
+    @Override
+    public Veiculo atualizacaoDados(NovoVeiculo veiculo, Veiculo existente) {
 
-        repository.save(existente);
-        return null;
+        existente.setPlaca(veiculo.getPlacaNovoVeiculo());
+        existente.setChassi(veiculo.getChassiNovoVeiculo());
+        existente.setAnoModelo(veiculo.getAnoModeloNovoVeiculo());
+        existente.setAnoFabricacao(veiculo.getAnoFabricacaoNovoVeiculo());
+        existente.setCor(veiculo.getCorNovoVeiculo());
+        existente.setUfPlaca(veiculo.getUfPlacaNovoVeiculo());
+        existente.setDataAquisicao(veiculo.getDataAquisicaoNovoVeiculo());
+
+        return existente;
     }
 
     @Override
@@ -182,5 +168,19 @@ public class VeiculoService implements VeiculoInterface{
     @Override
     public boolean verificaTamanhoDaPlaca(String placaVeiculo){
         return placaVeiculo.length() == 7;
+    }
+
+    @Override
+    public boolean veiculoNaoExiste(String renavam){
+        return repository.findById(renavam).isEmpty();
+    }
+
+    @Override
+    public boolean validacoesParaCadastroVeiculo(String renavam, String placa, String ufPlaca){
+        return veiculoNaoExiste(renavam) &&
+                validaRenavam(renavam) &&
+                validaPlaca(placa) &&
+                validaUf(ufPlaca) &&
+                ufExistente(ufPlaca);
     }
 }
