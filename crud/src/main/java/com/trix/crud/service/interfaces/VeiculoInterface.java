@@ -1,4 +1,4 @@
-package com.trix.crud.service;
+package com.trix.crud.service.interfaces;
 
 import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Veiculo;
