@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class VeiculoDTO {
+public class NovoVeiculo {
     private String renavamNovoVeiculo;
 
     private String placaNovoVeiculo;
@@ -15,6 +15,4 @@ public class VeiculoDTO {
     private String corNovoVeiculo;
     private String ufPlacaNovoVeiculo;
     private String dataAquisicaoNovoVeiculo;
-    private String nomeCondutorNovoVeiculo;
-    private String cnhCondutorNovoVeiculo;
 }
