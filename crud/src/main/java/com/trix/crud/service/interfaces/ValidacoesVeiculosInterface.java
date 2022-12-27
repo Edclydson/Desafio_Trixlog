@@ -15,4 +15,6 @@ public interface ValidacoesVeiculosInterface{
     boolean veiculoNaoExiste(String renavam);
 
     boolean validacoesParaCadastroVeiculo(String renavam, String placa, String ufPlaca);
+
+    boolean verificacaoVeiculoParaAquisicao(String renavam);
 }
