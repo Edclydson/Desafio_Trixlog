@@ -19,6 +19,9 @@ public class CondutorService implements CondutorInterface, ValidacoesCondutorInt
     @Autowired
     CondutorRepository repository;
 
+    @Autowired
+    VeiculoService veiculoService;
+
     @Override
     public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
         if(verificaCnhCondutor(novoCondutor.getNumCnh()) && verificaNomeCondutor(novoCondutor.getNome())){
@@ -69,10 +72,6 @@ public class CondutorService implements CondutorInterface, ValidacoesCondutorInt
 
     }
 
-    public void addVeiculoCondutor(Condutor condutor){
-        repository.save(condutor);
-    }
-
     public void rmvVeiculoCondutor(Condutor condutor){
         repository.save(condutor);
     }
@@ -113,5 +112,23 @@ public class CondutorService implements CondutorInterface, ValidacoesCondutorInt
         Condutor existente = repository.findById(condutorComAlteracao.getNumeroCnh()).get();
         existente.setNomeCondutor(condutorComAlteracao.getNomeCondutor());
         return existente;
+    }
+
+    @Override
+    public ResponseEntity adquirirVeiculo(String renavam, String cnh){
+        if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && verificacaoParaAquisicaoVeiculo(cnh)){
+            Condutor condutorComVeiculo = repository.findById(cnh).get();
+            condutorComVeiculo.getListaDeVeiculos().add(veiculoService.repository.findById(renavam).get());
+            repository.save(condutorComVeiculo);
+            veiculoService.atribuirCondutorAoVeiculo(renavam, cnh);
+            return ResponseEntity.ok("Veículo adquirido com sucesso");
+        }
+
+        return ResponseEntity.ok("Para adquerir um veiculo informe os dados corretamente.");
+    }
+
+    @Override
+    public boolean verificacaoParaAquisicaoVeiculo(String cnh){
+        return verificaCnhCondutor(cnh) && repository.existsById(cnh);
     }
 }
