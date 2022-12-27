@@ -4,4 +4,6 @@ public interface ValidacoesCondutorInterface{
     boolean verificaCnhCondutor(String cnh);
 
     boolean verificaNomeCondutor(String nome);
+
+    boolean verificacaoParaAquisicaoVeiculo(String cnh);
 }
