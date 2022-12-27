@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -182,5 +183,24 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
                 validaPlaca(placa) &&
                 validaUf(ufPlaca) &&
                 ufExistente(ufPlaca);
+    }
+
+    @Override
+    public boolean verificacaoVeiculoParaAquisicao(String renavam){
+        if(validaRenavam(renavam) && !veiculoNaoExiste(renavam)){
+            Veiculo veiculo = repository.findById(renavam).get();
+            return veiculo.getCnhCondutor().equals("");
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean atribuirCondutorAoVeiculo(String renavam, String cnh){
+        Veiculo veiculo = repository.findById(renavam).get();
+        veiculo.setCnhCondutor(cnh);
+        veiculo.setDataAquisicao(LocalDateTime.now().toString());
+        repository.save(veiculo);
+        return true;
     }
 }
