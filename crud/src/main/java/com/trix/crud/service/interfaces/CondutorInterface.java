@@ -23,4 +23,6 @@ public interface CondutorInterface{
     Condutor geraCondutor(NovoCondutor novoCondutor);
 
     Condutor alteracaoCondutor(Condutor condutorComAlteracao);
+
+    ResponseEntity adquirirVeiculo(String renavam, String cnh);
 }
