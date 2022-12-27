@@ -29,6 +29,7 @@ public interface VeiculoInterface{
 
     Veiculo atualizacaoDados(NovoVeiculo veiculo, Veiculo existente);
 
+    boolean atribuirCondutorAoVeiculo(String renavam, String cnh);
 
 
 }
