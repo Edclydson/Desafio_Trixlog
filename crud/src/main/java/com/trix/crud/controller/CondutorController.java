@@ -60,4 +60,10 @@ public class CondutorController {
     public ResponseEntity buscanomeCondutor(@PathVariable("nome_condutor") String nomeCondutor){
         return service.buscaNomeCondutor(nomeCondutor);
     }
+
+    @PutMapping("/addveiculo/{cnh}/{renavam}")
+    @ApiOperation(value = "Realiza a adição de um veiculo a lista de veiculos do condutor")
+    public ResponseEntity addVeiculo(@PathVariable("renavam") String renavam, @PathVariable("cnh") String cnh){
+        return service.adquirirVeiculo(renavam, cnh);
+    }
 }
