@@ -14,5 +14,4 @@ public class NovoVeiculo {
     private String anoFabricacaoNovoVeiculo;
     private String corNovoVeiculo;
     private String ufPlacaNovoVeiculo;
-    private String dataAquisicaoNovoVeiculo;
 }
