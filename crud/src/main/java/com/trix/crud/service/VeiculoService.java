@@ -4,26 +4,32 @@ import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Uf;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.VeiculoRepository;
-import com.trix.crud.service.interfaces.ValidacoesVeiculosInterface;
 import com.trix.crud.service.interfaces.VeiculoInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
-public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInterface{
+public class VeiculoService implements VeiculoInterface{
 
     @Autowired
     VeiculoRepository repository;
+    private static final String FORMATO_DATA = "yyyy-MM-dd";
 
     @Override
     public ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri) {
-        if(validacoesParaCadastroVeiculo(
+        if (validacoesParaCadastroVeiculo(
                 novoVeiculo.getRenavamNovoVeiculo(),
                 novoVeiculo.getPlacaNovoVeiculo(),
                 novoVeiculo.getUfPlacaNovoVeiculo())
@@ -45,24 +51,26 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
         veiculo.setPlaca(novoVeiculo.getPlacaNovoVeiculo());
         veiculo.setAnoFabricacao(novoVeiculo.getAnoFabricacaoNovoVeiculo());
         veiculo.setAnoModelo(novoVeiculo.getAnoModeloNovoVeiculo());
-        veiculo.setDataAquisicao(novoVeiculo.getDataAquisicaoNovoVeiculo());
+        veiculo.setDataAquisicao(dataDaAquisicao());
         veiculo.setCor(novoVeiculo.getCorNovoVeiculo());
         veiculo.setCnhCondutor("");
         return veiculo;
     }
 
     @Override
-    public List<Veiculo> findAll() throws ClassCastException{
+    public List<Veiculo> findAll() throws ClassCastException {
         try{
             return (List<Veiculo>) repository.findAll();
-        }catch (ClassCastException e){e.printStackTrace();}
+        } catch (ClassCastException e){
+            e.printStackTrace();
+        }
         return Collections.emptyList();
     }
 
     @Override
     public ResponseEntity buscaVeiculoComRenavam(String renavam) {
-        if(validaRenavam(renavam)){
-            if(repository.findById(renavam).isPresent()){
+        if (validaRenavam(renavam)){
+            if (repository.findById(renavam).isPresent()){
                 return ResponseEntity.ok(repository.findById(renavam));
             } else {
                 return ResponseEntity.ok("Veículo não encontrado!");
@@ -74,23 +82,23 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
     @Override
     public ResponseEntity buscaVeiculoComUfDaPlaca(String ufDaPlaca) {
         ufDaPlaca = ufDaPlaca.toUpperCase();
-        if(validaUf(ufDaPlaca) && ufExistente(ufDaPlaca)){
+        if (validaUf(ufDaPlaca) && ufExistente(ufDaPlaca)){
             List<Veiculo> resposta = repository.findByufPlaca(ufDaPlaca);
-            if(!resposta.isEmpty()){
+            if (!resposta.isEmpty()){
                 return ResponseEntity.ok(resposta);
+            } else {
+                return ResponseEntity.ok("Não encontramos nenhum veículo dessa localidade");
             }
-            else {return ResponseEntity.ok("Não encontramos nenhum veículo dessa localidade");}
         }
         return ResponseEntity.ok("Digite uma localidade válida");
     }
 
     @Override
     public ResponseEntity buscaVeiculoComPlaca(String placa) {
-        if(verificaTamanhoDaPlaca(placa)){
-            return (validaPlaca(placa)) ? ResponseEntity.ok(repository.findByPlaca(placa)):
+        if (verificaTamanhoDaPlaca(placa)){
+            return (validaPlaca(placa)) ? ResponseEntity.ok(repository.findByPlaca(placa)) :
                     ResponseEntity.ok("Não encontramos nenhum veículo");
-        }
-        else{
+        } else {
             List<Veiculo> resposta = repository.findByPlacaContaining(placa);
             return !resposta.isEmpty() ?
                     ResponseEntity.ok(resposta) :
@@ -100,15 +108,18 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
 
     @Override
     public ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal) {
-        //return repository.findByintevalo(datainicio, datafim);
-        return null;
+        if (dataInicial.matches("(\\d{2}-\\d{2}-\\d{4})") && dataFinal.matches("(\\d{2}-\\d{2}-\\d{4})")
+                && validaData(dataInicial) && validaData(dataFinal)){
+            return ResponseEntity.ok(repository.findByintevalo(converteStringtoData(dataInicial), converteStringtoData(dataFinal)));
+        }
+        return ResponseEntity.ok("Por favor informe uma data válida! Ex: 31-12-2022");
     }
 
     @Override
     public ResponseEntity alterarDadosVeiculo(NovoVeiculo veiculo) {
-        if(repository.findById(veiculo.getRenavamNovoVeiculo()).isPresent()){
+        if (repository.findById(veiculo.getRenavamNovoVeiculo()).isPresent()){
             Veiculo existente = repository.findById(veiculo.getRenavamNovoVeiculo()).get();
-            repository.save(atualizacaoDados(veiculo,existente));
+            repository.save(atualizacaoDados(veiculo, existente));
             return ResponseEntity.ok("Alterações salvas com sucesso");
         }
         return ResponseEntity.ok("Não existe nenhum veiculo com o renavam informado!");
@@ -123,15 +134,14 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
         existente.setAnoFabricacao(veiculo.getAnoFabricacaoNovoVeiculo());
         existente.setCor(veiculo.getCorNovoVeiculo());
         existente.setUfPlaca(veiculo.getUfPlacaNovoVeiculo());
-        existente.setDataAquisicao(veiculo.getDataAquisicaoNovoVeiculo());
 
         return existente;
     }
 
     @Override
     public ResponseEntity deletarVeiculo(String renavam) {
-        if(validaRenavam(renavam)){
-            if(repository.findById(renavam).isPresent()){
+        if (validaRenavam(renavam)){
+            if (repository.findById(renavam).isPresent()){
                 repository.deleteById(renavam);
                 return ResponseEntity.noContent().build();
             }
@@ -141,7 +151,7 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
     }
 
     @Override
-    public boolean validaRenavam(String renavam){
+    public boolean validaRenavam(String renavam) {
         return renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z]).+");
     }
 
@@ -153,8 +163,8 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
 
     @Override
     public boolean ufExistente(String uf) {
-        for(Uf existente: Uf.values()){
-            if(existente.toString().equals(uf)){
+        for (Uf existente : Uf.values()){
+            if (existente.toString().equals(uf)){
                 return true;
             }
         }
@@ -167,17 +177,17 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
     }
 
     @Override
-    public boolean verificaTamanhoDaPlaca(String placaVeiculo){
+    public boolean verificaTamanhoDaPlaca(String placaVeiculo) {
         return placaVeiculo.length() == 7;
     }
 
     @Override
-    public boolean veiculoNaoExiste(String renavam){
+    public boolean veiculoNaoExiste(String renavam) {
         return repository.findById(renavam).isEmpty();
     }
 
     @Override
-    public boolean validacoesParaCadastroVeiculo(String renavam, String placa, String ufPlaca){
+    public boolean validacoesParaCadastroVeiculo(String renavam, String placa, String ufPlaca) {
         return veiculoNaoExiste(renavam) &&
                 validaRenavam(renavam) &&
                 validaPlaca(placa) &&
@@ -186,21 +196,64 @@ public class VeiculoService implements VeiculoInterface, ValidacoesVeiculosInter
     }
 
     @Override
-    public boolean verificacaoVeiculoParaAquisicao(String renavam){
-        if(validaRenavam(renavam) && !veiculoNaoExiste(renavam)){
+    public boolean verificacaoVeiculoParaAquisicao(String renavam) {
+        if (validaRenavam(renavam) && !veiculoNaoExiste(renavam)){
             Veiculo veiculo = repository.findById(renavam).get();
             return veiculo.getCnhCondutor().equals("");
         }
         return false;
     }
 
-
     @Override
-    public boolean atribuirCondutorAoVeiculo(String renavam, String cnh){
+    public boolean atribuirCondutorAoVeiculo(String renavam, String cnh) {
         Veiculo veiculo = repository.findById(renavam).get();
         veiculo.setCnhCondutor(cnh);
-        veiculo.setDataAquisicao(LocalDateTime.now().toString());
         repository.save(veiculo);
         return true;
+    }
+
+    @Override
+    public Veiculo LiberacaoVeiculo(String renavam) {
+        Veiculo veiculo = repository.findById(renavam).get();
+        veiculo.setCnhCondutor("");
+        repository.save(veiculo);
+        return veiculo;
+    }
+
+    @Override
+    public boolean validaData(String data) {
+        try{
+            SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
+            date.setLenient(false);
+            date.parse(data);
+            return true;
+        } catch (ParseException e){
+            return false;
+        }
+    }
+
+    @Override
+    public Date dataDaAquisicao() {
+        try{
+            SimpleDateFormat date = new SimpleDateFormat(FORMATO_DATA);
+            date.setLenient(false);
+            return date.parse(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        } catch (NullPointerException | ParseException e){
+            return null;
+        }
+    }
+
+
+    @Override
+    public Date converteStringtoData(String data) {
+        try{
+            SimpleDateFormat date = new SimpleDateFormat(FORMATO_DATA);
+            DateTimeFormatter dataFormatoInserido = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter dataFormatoNecessario = DateTimeFormatter.ofPattern(FORMATO_DATA);
+            date.setLenient(false);
+            return date.parse(LocalDate.parse(data, dataFormatoInserido).format(dataFormatoNecessario));
+        } catch (DateTimeParseException | NullPointerException | ParseException e){
+            return null;
+        }
     }
 }
