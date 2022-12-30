@@ -66,8 +66,8 @@ public class VeiculoController {
 
     @GetMapping("/intervaloaquisicao/{datainicio}/{datafim}")
     @ApiOperation(value = "Realiza a busca de veículos pelo intervalo de data da aquisição")
-    public List<Veiculo> intervalodataaquisicao(@PathVariable("datainicio") String datainicio,
+    public ResponseEntity intervalodataaquisicao(@PathVariable("datainicio") String datainicio,
                                                 @PathVariable("datafim") String datafim){
-        return null;//service.buscaVeiculosComIntervaloAquisicao(datainicio, datafim).getBody();
+        return service.buscaVeiculosComIntervaloAquisicao(datainicio, datafim);
     }
 }
