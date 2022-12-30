@@ -66,4 +66,10 @@ public class CondutorController {
     public ResponseEntity addVeiculo(@PathVariable("renavam") String renavam, @PathVariable("cnh") String cnh){
         return service.adquirirVeiculo(renavam, cnh);
     }
+
+    @PutMapping("/liberarveiculo/{cnh}/{renavam}")
+    @ApiOperation(value = "Realiza a remoção de um veiculo da lista de veiculos do condutor")
+    public ResponseEntity liberarVeiculo(@PathVariable("renavam") String renavam, @PathVariable("cnh") String cnh){
+        return service.liberarVeiculo(renavam, cnh);
+    }
 }
