@@ -4,7 +4,11 @@ import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -25,10 +29,12 @@ public class Veiculo {
     private String anoModelo;
     @Column(length = 4)
     private String anoFabricacao;
+    @Column(length = 10)
     private String cor;
     @Column(length = 2)
     private String ufPlaca;
-    private String dataAquisicao;
+    @Column(nullable = false ,columnDefinition = "DATE")
+    private Date dataAquisicao;
     @Column(length = 11)
     private String cnhCondutor;
 
