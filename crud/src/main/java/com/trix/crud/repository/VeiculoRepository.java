@@ -1,12 +1,12 @@
 package com.trix.crud.repository;
 
-import java.util.List;
-
+import com.trix.crud.modelo.Veiculo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.trix.crud.modelo.Veiculo;
+import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface VeiculoRepository extends CrudRepository<Veiculo, String>{
@@ -17,6 +17,6 @@ public interface VeiculoRepository extends CrudRepository<Veiculo, String>{
     List<Veiculo> findByPlacaContaining(String placa);
 
     @Query(value = "SELECT * FROM veiculo WHERE data_aquisicao BETWEEN :datainicio AND :datafim ", nativeQuery = true)
-    List<Veiculo> findByintevalo(String datainicio,String datafim);
+    List<Veiculo> findByintevalo(Date datainicio, Date datafim);
 
 }
