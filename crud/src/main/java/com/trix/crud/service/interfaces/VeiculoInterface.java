@@ -5,9 +5,10 @@ import com.trix.crud.modelo.Veiculo;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
-public interface VeiculoInterface{
+public interface VeiculoInterface extends ValidacoesVeiculosInterface{
 
     ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri);
 
@@ -31,5 +32,10 @@ public interface VeiculoInterface{
 
     boolean atribuirCondutorAoVeiculo(String renavam, String cnh);
 
+    Veiculo LiberacaoVeiculo(String renavam);
+
+    Date dataDaAquisicao();
+
+    Date converteStringtoData(String data);
 
 }
