@@ -4,6 +4,7 @@ import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
+import com.trix.crud.repository.VeiculoRepository;
 import com.trix.crud.service.interfaces.CondutorInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class CondutorService implements CondutorInterface{
 
     @Autowired
     CondutorRepository repository;
+
+    @Autowired
+    VeiculoRepository veiculoRepository;
 
     @Autowired
     VeiculoService veiculoService;
@@ -114,7 +118,9 @@ public class CondutorService implements CondutorInterface{
     public ResponseEntity adquirirVeiculo(String renavam, String cnh){
         if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && verificacaoParaAquisicaoVeiculo(cnh)){
             Condutor condutorComVeiculo = repository.findById(cnh).get();
-            condutorComVeiculo.getListaDeVeiculos().add(veiculoService.repository.findById(renavam).get());
+            List<Veiculo> novaLista = new ArrayList<>(condutorComVeiculo.getListaDeVeiculos());
+            novaLista.add(veiculoRepository.findById(renavam).get());
+            condutorComVeiculo.setListaDeVeiculos(novaLista);
             repository.save(condutorComVeiculo);
             veiculoService.atribuirCondutorAoVeiculo(renavam, cnh);
             return ResponseEntity.ok("Veículo adquirido com sucesso");
