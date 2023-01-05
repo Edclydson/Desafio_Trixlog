@@ -3,8 +3,11 @@ package com.trix.crud.condutor;
 import com.trix.crud.ApplicationConfigTest;
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
+import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
+import com.trix.crud.repository.VeiculoRepository;
 import com.trix.crud.service.CondutorService;
+import com.trix.crud.service.VeiculoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -29,12 +32,20 @@ public class TestCondutorService extends ApplicationConfigTest {
     @MockBean
     CondutorRepository repository;
 
+    @MockBean
+    VeiculoRepository veiculoRepository;
+
+    @Autowired
+    VeiculoService veiculoService;
+
     @Autowired
     CondutorService service;
 
     private Condutor condutor;
 
     private NovoCondutor novoCondutor;
+
+    private Veiculo veiculo;
 
     private List<Condutor> lista = new ArrayList<>();
 
@@ -50,6 +61,16 @@ public class TestCondutorService extends ApplicationConfigTest {
         novoCondutor = mock(NovoCondutor.class);
         when(novoCondutor.getNome()).thenReturn("Zé Bedeu");
         when(novoCondutor.getNumCnh()).thenReturn("79541234658");
+
+        veiculo = Mockito.mock(Veiculo.class);
+        when(repository.existsById("77546831291")).thenReturn(true);
+        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
+        when(veiculo.getCnhCondutor()).thenReturn("");
+        when(veiculoRepository.findById("78461824953")).thenReturn(Optional.of(veiculo));
+        when(repository.save(condutor)).thenReturn(condutor);
+        when(veiculoRepository.save(veiculo)).thenReturn(veiculo);
+        when(condutor.getListaDeVeiculos()).thenReturn(Collections.singletonList(veiculo));
+
     }
 
     @Test
@@ -190,14 +211,25 @@ public class TestCondutorService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveAddVeiculoAoCondutor(){
-        service.addVeiculoCondutor(condutor);
+    void DeveRetornarSucesso_AdquirirVeiculo(){
+        condutor = new Condutor();
+        condutor.setNomeCondutor("Edclydson Sousa");
+        condutor.setNumeroCnh("77546831291");
+        condutor.setListaDeVeiculos(Collections.singletonList(veiculo));
+
+        ResponseEntity resposta = service.adquirirVeiculo("78461824953","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Veículo adquirido com sucesso",resposta.getBody());
         Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Condutor.class));
+        Mockito.verify(veiculoRepository, Mockito.times(1)).save(ArgumentMatchers.any(Veiculo.class));
+
     }
 
     @Test
-    void DeveRemoverVeiculoDoCondutor(){
-        service.rmvVeiculoCondutor(condutor);
+    void DeveRetornarSucesso_AoliberarVeiculo(){
+        service.liberarVeiculo("79541234658","77546831291");
         Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Condutor.class));
     }
 
