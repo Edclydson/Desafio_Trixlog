@@ -228,6 +228,52 @@ public class TestCondutorService extends ApplicationConfigTest {
     }
 
     @Test
+    void DeveRetornarErro_AdquirirVeiculo(){
+        condutor = new Condutor();
+        condutor.setNomeCondutor("Edclydson Sousa");
+        condutor.setNumeroCnh("77546831291");
+        condutor.setListaDeVeiculos(Collections.singletonList(veiculo));
+
+        ResponseEntity resposta = service.adquirirVeiculo("78461824953","7754683129"); // cnh com 10 digitos
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+        resposta = service.adquirirVeiculo("7846182495","77546831291"); // renavam com 10 digitos
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+        resposta = service.adquirirVeiculo("78461824953","7754683129l"); // letra na cnh
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+        resposta = service.adquirirVeiculo("7846l824953","77546831291"); // letra no renavam
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+        resposta = service.adquirirVeiculo("-78461824953","77546831291"); // numero negativo no renavam
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+        resposta = service.adquirirVeiculo("00000000000","77546831291"); // 11 digitos 0 no renavam
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
+
+
+    }
+
+    @Test
     void DeveRetornarSucesso_AoliberarVeiculo(){
         service.liberarVeiculo("79541234658","77546831291");
         Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Condutor.class));
