@@ -63,13 +63,7 @@ public class TestCondutorService extends ApplicationConfigTest {
         when(novoCondutor.getNumCnh()).thenReturn("79541234658");
 
         veiculo = Mockito.mock(Veiculo.class);
-        when(repository.existsById("77546831291")).thenReturn(true);
-        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
-        when(veiculo.getCnhCondutor()).thenReturn("");
-        when(veiculoRepository.findById("78461824953")).thenReturn(Optional.of(veiculo));
-        when(repository.save(condutor)).thenReturn(condutor);
-        when(veiculoRepository.save(veiculo)).thenReturn(veiculo);
-        when(condutor.getListaDeVeiculos()).thenReturn(Collections.singletonList(veiculo));
+
 
     }
 
@@ -217,6 +211,14 @@ public class TestCondutorService extends ApplicationConfigTest {
         condutor.setNumeroCnh("77546831291");
         condutor.setListaDeVeiculos(Collections.singletonList(veiculo));
 
+        when(repository.existsById("77546831291")).thenReturn(true);
+        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
+        when(veiculo.getCnhCondutor()).thenReturn("");
+        when(veiculoRepository.findById("78461824953")).thenReturn(Optional.of(veiculo));
+        when(repository.save(condutor)).thenReturn(condutor);
+        when(veiculoRepository.save(veiculo)).thenReturn(veiculo);
+        when(condutor.getListaDeVeiculos()).thenReturn(Collections.singletonList(veiculo));
+
         ResponseEntity resposta = service.adquirirVeiculo("78461824953","77546831291");
 
         assertNotNull(resposta);
@@ -275,7 +277,22 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarSucesso_AoliberarVeiculo(){
-        service.liberarVeiculo("79541234658","77546831291");
+        veiculo = new Veiculo();
+        veiculo.setRenavam("79541234658");
+        List<Veiculo> listaVeiculos = new ArrayList<>();
+        listaVeiculos.add(veiculo);
+        condutor.setNumeroCnh("77546831291");
+
+        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
+        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(listaVeiculos);
+        when(veiculoRepository.findById("79541234658")).thenReturn(Optional.of(veiculo));
+        when(repository.existsById("77546831291")).thenReturn(true);
+
+        ResponseEntity resposta = service.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("O Condutor não tem mais posse do veículo: "+veiculo.getRenavam(),resposta.getBody());
         Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Condutor.class));
     }
 
