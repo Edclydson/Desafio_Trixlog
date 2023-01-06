@@ -133,7 +133,9 @@ public class CondutorService implements CondutorInterface{
         if(verificacaoSeCondutorTemVeiculo(cnh) && verificaSeCondutorPossuioVeiculo(renavam, cnh)
         && verificaCnhCondutor(cnh)){
             Condutor condutor = repository.findById(cnh).get();
-            condutor.getListaDeVeiculos().remove(veiculoService.LiberacaoVeiculo(renavam));
+            List<Veiculo> novaLista = new ArrayList<>(condutor.getListaDeVeiculos());
+            novaLista.remove(veiculoService.LiberacaoVeiculo(renavam));
+            condutor.setListaDeVeiculos(novaLista);
             repository.save(condutor);
             return ResponseEntity.ok("O Condutor não tem mais posse do veículo: " +renavam);
         }
@@ -152,7 +154,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public boolean verificaSeCondutorPossuioVeiculo(String renavam, String cnh){
-        List<Veiculo> veiculosCondutor = repository.findById(cnh).get().getListaDeVeiculos();
+        List<Veiculo> veiculosCondutor = new ArrayList<>(repository.findById(cnh).get().getListaDeVeiculos());
         for(Veiculo veiculo : veiculosCondutor){
             if(veiculo.getRenavam().equals(renavam)){
                 return true;
