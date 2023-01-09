@@ -297,6 +297,20 @@ public class TestCondutorService extends ApplicationConfigTest {
     }
 
     @Test
+    void DeveRetornarErro_AoLiberaVeiculo(){
+        condutor.setNumeroCnh("77546831291");
+
+        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
+        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(Collections.emptyList());
+
+        ResponseEntity resposta = service.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+    }
+    @Test
     void DeveRetornarStatusCodeOK_AoBuscarCondutorPeloNome(){
         condutor = new Condutor();
         condutor.setNomeCondutor("Zé Bedeu");
