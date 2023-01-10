@@ -235,4 +235,28 @@ class TestCondutorController extends ApplicationConfigTest{
         assertEquals("Para adquerir um veiculo informe os dados corretamente.",response.getBody());
 
     }
+
+    @Test
+    void DeveRetornarStatusCodeOK_AoLiberarVeiculo(){
+        Mockito.when(service.liberarVeiculo(ArgumentMatchers.anyString(),ArgumentMatchers.anyString()))
+                .thenReturn(ResponseEntity.ok("O Condutor não tem mais posse do veículo: 14578652498"));
+
+        ResponseEntity response = controller.liberarVeiculo("14578652498","25468731845");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("O Condutor não tem mais posse do veículo: 14578652498",response.getBody());
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoLiberarVeiculo(){
+        Mockito.when(service.liberarVeiculo(ArgumentMatchers.anyString(),ArgumentMatchers.anyString()))
+                .thenReturn(ResponseEntity.ok("Requisição não foi processada! Tente novamente."));
+
+        ResponseEntity response = controller.liberarVeiculo("14578652498","25468731845");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",response.getBody());
+    }
 }
