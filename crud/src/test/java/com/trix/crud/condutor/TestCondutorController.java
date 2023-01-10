@@ -1,28 +1,29 @@
 package com.trix.crud.condutor;
 
-import java.util.*;
-
+import com.trix.crud.ApplicationConfigTest;
+import com.trix.crud.controller.CondutorController;
 import com.trix.crud.dto.NovoCondutor;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
+import com.trix.crud.modelo.Condutor;
+import com.trix.crud.service.CondutorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import com.trix.crud.ApplicationConfigTest;
-import com.trix.crud.controller.CondutorController;
-import com.trix.crud.modelo.Condutor;
-import com.trix.crud.service.CondutorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("unchecked")
-public class TestCondutorController extends ApplicationConfigTest{
+class TestCondutorController extends ApplicationConfigTest{
 
     @MockBean
     private CondutorService service;
@@ -194,6 +195,7 @@ public class TestCondutorController extends ApplicationConfigTest{
         Mockito.when(service.deletaCondutor(ArgumentMatchers.anyString())).thenReturn(ResponseEntity.noContent().build());
 
         ResponseEntity resultado = controller.deletar(condutor.getNumeroCnh());
+
         assertEquals(HttpStatus.NO_CONTENT,resultado.getStatusCode());
         assertNotEquals(HttpStatus.OK,resultado.getStatusCode());
         Mockito.verify(service, Mockito.times(1)).deletaCondutor(ArgumentMatchers.anyString());
@@ -208,5 +210,17 @@ public class TestCondutorController extends ApplicationConfigTest{
         assertNotEquals(HttpStatus.NO_CONTENT,resultado.getStatusCode());
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         Mockito.verify(service, Mockito.times(1)).deletaCondutor(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOK_AoAdquirirVeiculo(){
+        Mockito.when(service.adquirirVeiculo(ArgumentMatchers.anyString(),ArgumentMatchers.anyString()))
+                .thenReturn(ResponseEntity.ok("Veículo adquirido com sucesso"));
+
+        ResponseEntity response = controller.addVeiculo("14578652498","25468731845");
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Veículo adquirido com sucesso",response.getBody());
+
     }
 }
