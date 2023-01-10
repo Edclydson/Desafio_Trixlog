@@ -300,10 +300,31 @@ public class TestCondutorService extends ApplicationConfigTest {
     void DeveRetornarErro_AoLiberaVeiculo(){
         condutor.setNumeroCnh("77546831291");
 
+        //condutor não existente
         when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
-        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(Collections.emptyList());
+        when(repository.existsById("77546831291")).thenReturn(false);
 
         ResponseEntity resposta = service.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+        //condutor não possui nenhum veiculo
+        when(repository.existsById("77546831291")).thenReturn(true);
+        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(Collections.emptyList());
+
+        resposta = service.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+        //condutor não possui o veiculo informado
+        when(veiculoRepository.findById("79541234658")).thenReturn(Optional.of(veiculo));
+        when(veiculo.getRenavam()).thenReturn("79541234659");
+
+        resposta = service.liberarVeiculo("79541234658","77546831291");
 
         assertNotNull(resposta);
         assertEquals(HttpStatus.OK,resposta.getStatusCode());
