@@ -223,4 +223,16 @@ class TestCondutorController extends ApplicationConfigTest{
         assertEquals("Veículo adquirido com sucesso",response.getBody());
 
     }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoAdquirirVeiculo(){
+        Mockito.when(service.adquirirVeiculo(ArgumentMatchers.anyString(),ArgumentMatchers.anyString()))
+                .thenReturn(ResponseEntity.ok("Para adquerir um veiculo informe os dados corretamente."));
+
+        ResponseEntity response = controller.addVeiculo("14578652498","25468731845");
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Para adquerir um veiculo informe os dados corretamente.",response.getBody());
+
+    }
 }
