@@ -217,7 +217,6 @@ public class TestCondutorService extends ApplicationConfigTest {
         when(veiculoRepository.findById("78461824953")).thenReturn(Optional.of(veiculo));
         when(repository.save(condutor)).thenReturn(condutor);
         when(veiculoRepository.save(veiculo)).thenReturn(veiculo);
-        when(condutor.getListaDeVeiculos()).thenReturn(Collections.singletonList(veiculo));
 
         ResponseEntity resposta = service.adquirirVeiculo("78461824953","77546831291");
 
