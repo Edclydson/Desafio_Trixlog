@@ -93,15 +93,38 @@ class TestVeiculoService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarStatusCodeOKComOptionalDeVeiculo_AoBuscarVeiculoPeloRenavam(){
-        veiculo.setRenavam("44745162039");
         Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
 
         ResponseEntity response = service.buscaVeiculoComRenavam("44745162039");
 
         assertNotNull(response);
+        assertEquals(Optional.class, response.getBody().getClass());
         assertEquals(Optional.of(veiculo),response.getBody());
         assertEquals(HttpStatus.OK,response.getStatusCode());
         Mockito.verify(repository,Mockito.times(2)).findById(ArgumentMatchers.anyString());
+
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPeloRenavam(){
+        //veiculo não cadastrado
+        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.empty());
+
+        ResponseEntity response = service.buscaVeiculoComRenavam("44745162039");
+
+        assertNotNull(response);
+        assertEquals("Veículo não encontrado!",response.getBody());
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+
+        //renavam com letra
+        response = service.buscaVeiculoComRenavam("44745162O39");
+
+        assertEquals("O renavam 44745162O39 não é válido!", response.getBody());
+
+        //renavam com caracteres especiais
+        response = service.buscaVeiculoComRenavam("+4745162039");
+
+        assertEquals("O renavam +4745162039 não é válido!", response.getBody());
 
     }
 
