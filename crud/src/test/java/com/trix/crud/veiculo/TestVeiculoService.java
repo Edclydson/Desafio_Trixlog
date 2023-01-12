@@ -91,5 +91,19 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertTrue(response.contains(veiculo));
     }
 
+    @Test
+    void DeveRetornarStatusCodeOKComOptionalDeVeiculo_AoBuscarVeiculoPeloRenavam(){
+        veiculo.setRenavam("44745162039");
+        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
+
+        ResponseEntity response = service.buscaVeiculoComRenavam("44745162039");
+
+        assertNotNull(response);
+        assertEquals(Optional.of(veiculo),response.getBody());
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        Mockito.verify(repository,Mockito.times(2)).findById(ArgumentMatchers.anyString());
+
+    }
+
 
 }
