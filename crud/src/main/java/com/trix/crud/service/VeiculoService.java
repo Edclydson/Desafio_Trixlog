@@ -149,7 +149,7 @@ public class VeiculoService implements VeiculoInterface{
 
     @Override
     public boolean validaRenavam(String renavam) {
-        return renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z]).+");
+        return renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z} {,.^?~=+_/*|]).+");
     }
 
 
