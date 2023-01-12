@@ -16,10 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestVeiculoService extends ApplicationConfigTest {
 
@@ -76,6 +78,17 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Cadastro não realizado!",response.getBody());
         Mockito.verify(repository, Mockito.times(1)).findById(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarListDeVeiculos_AoListarVeiculos(){
+        Mockito.when(repository.findAll()).thenReturn(Collections.singletonList(veiculo));
+
+        List<Veiculo> response = service.findAll();
+
+        assertNotNull(response);
+        assertEquals(ArrayList.class,response.getClass());
+        assertTrue(response.contains(veiculo));
     }
 
 
