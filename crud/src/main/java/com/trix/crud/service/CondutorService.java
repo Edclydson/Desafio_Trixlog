@@ -89,7 +89,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public boolean verificaCnhCondutor(String cnh){
-        return cnh.matches("(?=.*\\d).{11}") && !cnh.matches("(?=.*[a-zA-Z]).+");
+        return cnh.matches("(?=.*\\d).{11}") && !cnh.matches("(?=.*[a-zA-Z} {,.^?~=+_/*|]).+");
     }
 
     @Override
