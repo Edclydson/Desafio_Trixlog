@@ -16,9 +16,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class VeiculoService implements VeiculoInterface{
@@ -58,13 +59,9 @@ public class VeiculoService implements VeiculoInterface{
     }
 
     @Override
-    public List<Veiculo> findAll() throws ClassCastException {
-        try{
-            return (List<Veiculo>) repository.findAll();
-        } catch (ClassCastException e){
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+    public List<Veiculo> findAll() {
+        Iterable<Veiculo> iterableVeiculo = repository.findAll();
+        return StreamSupport.stream(iterableVeiculo.spliterator(),false).collect(Collectors.toList());
     }
 
     @Override
