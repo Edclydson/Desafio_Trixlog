@@ -22,6 +22,8 @@ public interface VeiculoInterface extends ValidacoesVeiculosInterface{
 
     ResponseEntity buscaVeiculoComPlaca(String placa);
 
+    List<Veiculo> buscaPorParteDaPlaca(String placa);
+
     ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal);
 
     ResponseEntity alterarDadosVeiculo(NovoVeiculo veiculo);
