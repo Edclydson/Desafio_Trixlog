@@ -206,4 +206,46 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         Mockito.verify(repository).findByPlacaContaining(ArgumentMatchers.anyString());
     }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPelaPlaca(){
+        //passando somente um digito da placa
+        ResponseEntity response = service.buscaVeiculoComPlaca("H");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("A placa informada não é válida!",response.getBody());
+
+
+        //passando digito inválido na placa
+        response = service.buscaVeiculoComPlaca("HWJ-");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("A placa informada não é válida!",response.getBody());
+
+
+        //passando mais de 7 digitos na placa
+        response = service.buscaVeiculoComPlaca("HWJ6E631");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("A placa informada não é válida!",response.getBody());
+
+
+        //passando 7 digitos numericos
+        response = service.buscaVeiculoComPlaca("4516631");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("A placa informada não é válida!",response.getBody());
+
+
+        //passando 7 letras
+        response = service.buscaVeiculoComPlaca("HWJIGFL");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("A placa informada não é válida!",response.getBody());
+    }
 }
