@@ -27,6 +27,7 @@ public class VeiculoService implements VeiculoInterface{
     @Autowired
     VeiculoRepository repository;
     private static final String FORMATO_DATA = "yyyy-MM-dd";
+    private static final String MENSAGEM_RETORNO = "A placa informada não é válida!";
 
     @Override
     public ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri) {
@@ -92,15 +93,35 @@ public class VeiculoService implements VeiculoInterface{
 
     @Override
     public ResponseEntity buscaVeiculoComPlaca(String placa) {
-        if (verificaTamanhoDaPlaca(placa)){
-            return (validaPlaca(placa)) ? ResponseEntity.ok(repository.findByPlaca(placa)) :
-                    ResponseEntity.ok("Não encontramos nenhum veículo");
-        } else {
-            List<Veiculo> resposta = repository.findByPlacaContaining(placa);
-            return !resposta.isEmpty() ?
-                    ResponseEntity.ok(resposta) :
-                    ResponseEntity.ok("Não encontramos nenhum veículo");
+        List<Veiculo> resposta;
+        if ((placa.length() == 7) && validaPlaca(placa)){
+            resposta = repository.findByPlaca(placa);
+            return  !resposta.isEmpty() ? ResponseEntity.ok(resposta) :
+                        ResponseEntity.ok("Não encontramos nenhum veículo");
         }
+        else if((placa.length() >= 2 && placa.length() <= 6) && placaContains(placa)) {
+            resposta = buscaPorParteDaPlaca(placa);
+            return !resposta.isEmpty() ?
+                        ResponseEntity.ok(resposta) :
+                        ResponseEntity.ok("Não encontramos nenhum veículo");
+        }
+        return ResponseEntity.ok(MENSAGEM_RETORNO);
+    }
+
+    @Override
+    public boolean validaPlaca(String placaVeiculo) {
+        return placaVeiculo.matches("[A-Z]{3}\\d[A-Z]\\d{2}|[A-Z]{3}\\d{4}");
+    }
+
+    @Override
+    public boolean placaContains(String partePlacaVeiculo){
+        return partePlacaVeiculo.matches("(?=.*[a-zA-Z\\d]).+") &&
+                !partePlacaVeiculo.matches("(?=.*[-} {,.^?~=+_/*|]).+");
+    }
+
+    @Override
+    public List<Veiculo> buscaPorParteDaPlaca(String placa){
+        return repository.findByPlacaContaining(placa);
     }
 
     @Override
@@ -152,7 +173,6 @@ public class VeiculoService implements VeiculoInterface{
         return renavam.matches("(?=.*\\d).{11}") && !renavam.matches("(?=.*[a-zA-Z} {,.^?~=+_/*|]).+");
     }
 
-
     @Override
     public boolean validaUf(String uf) {
         return !uf.matches("(?=.*\\d[} {,.^?~=+_/*|]).+") && uf.matches("(?=.*[a-zA-Z]).{2}");
@@ -168,15 +188,6 @@ public class VeiculoService implements VeiculoInterface{
         return false;
     }
 
-    @Override
-    public boolean validaPlaca(String placaVeiculo) {
-        return placaVeiculo.matches("[A-Z]{3}\\d[A-Z]\\d{2}|[A-Z]{3}\\d{4}");
-    }
-
-    @Override
-    public boolean verificaTamanhoDaPlaca(String placaVeiculo) {
-        return placaVeiculo.length() == 7;
-    }
 
     @Override
     public boolean veiculoNaoExiste(String renavam) {
