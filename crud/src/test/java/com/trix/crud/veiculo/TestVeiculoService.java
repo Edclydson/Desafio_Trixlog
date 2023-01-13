@@ -128,5 +128,19 @@ class TestVeiculoService extends ApplicationConfigTest {
 
     }
 
+    @Test
+    void DeveRetornarStatusCodeOKComListaDeVeiculos_AoBuscarVeiculoPelaUfDaPlaca(){
+        List<Veiculo> listaDeVeiculos = new ArrayList<>();
+        listaDeVeiculos.add(veiculo);
+        Mockito.when(repository.findByufPlaca("RR")).thenReturn(listaDeVeiculos);
+
+        ResponseEntity response = service.buscaVeiculoComUfDaPlaca("RR");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(ArrayList.class,response.getBody().getClass());
+        Mockito.verify(repository).findByufPlaca(ArgumentMatchers.anyString());
+
+    }
 
 }
