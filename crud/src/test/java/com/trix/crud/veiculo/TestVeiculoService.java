@@ -143,4 +143,45 @@ class TestVeiculoService extends ApplicationConfigTest {
 
     }
 
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPelaUfDaPlaca(){
+        //passando uf inexistente
+        ResponseEntity response = service.buscaVeiculoComUfDaPlaca("XA");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Digite uma localidade válida",response.getBody());
+
+        //passando uf inválida
+        response = service.buscaVeiculoComUfDaPlaca("*~");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Digite uma localidade válida",response.getBody());
+
+        //passando uf com três digitos
+        response = service.buscaVeiculoComUfDaPlaca("RRR");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Digite uma localidade válida",response.getBody());
+
+        //passando uf com um digito
+        response = service.buscaVeiculoComUfDaPlaca("R");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Digite uma localidade válida",response.getBody());
+
+        //não encontrou veiculos da UF informada
+        Mockito.when(repository.findByufPlaca("RR")).thenReturn(Collections.emptyList());
+
+        response = service.buscaVeiculoComUfDaPlaca("RR");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Não encontramos nenhum veículo dessa localidade",response.getBody());
+
+    }
+
 }
