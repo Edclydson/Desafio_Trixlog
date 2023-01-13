@@ -269,4 +269,48 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(ArrayList.class,response.getBody().getClass());
         Mockito.verify(repository).findByintevalo(ArgumentMatchers.any(Date.class),ArgumentMatchers.any(Date.class));
     }
+
+    @Test
+    void DeveRetornarStatusCodeOkComErro_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        DateTimeFormatter dataFormatoInserido = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dataFormatoNecessario = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        date.setLenient(false);
+        Date dataInicial = date.parse(LocalDate.parse("01-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
+        Date dataFinal = date.parse(LocalDate.parse("13-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
+        Mockito.when(repository.findByintevalo(dataInicial,dataFinal)).thenReturn(Collections.emptyList());
+
+        // informando um intervalo onde não há veiculos adquiridos
+        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","13-01-2023");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Não há registros de veculos adquiridos no intervalo informado!",response.getBody());
+        Mockito.verify(repository).findByintevalo(ArgumentMatchers.any(Date.class),ArgumentMatchers.any(Date.class));
+
+
+        // informando uma data inválida
+        response = service.buscaVeiculosComIntervaloAquisicao("32-01-2023","13-01-2023");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Por favor informe uma data válida! Ex: 31-12-2022",response.getBody());
+
+
+        // informando uma data com letras
+        response = service.buscaVeiculosComIntervaloAquisicao("O1-01-2023","13-01-2023");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Por favor informe uma data válida! Ex: 31-12-2022",response.getBody());
+
+
+        // informando uma data com separadores diferentes
+        response = service.buscaVeiculosComIntervaloAquisicao("01/01/2023","13/01/2023");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Por favor informe uma data válida! Ex: 31-12-2022",response.getBody());
+    }
 }
