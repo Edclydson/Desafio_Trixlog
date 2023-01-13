@@ -155,7 +155,7 @@ public class VeiculoService implements VeiculoInterface{
 
     @Override
     public boolean validaUf(String uf) {
-        return !uf.matches("(?=.*\\d).+") && uf.matches("(?=.*[a-zA-Z]).{2}");
+        return !uf.matches("(?=.*\\d[} {,.^?~=+_/*|]).+") && uf.matches("(?=.*[a-zA-Z]).{2}");
     }
 
     @Override
