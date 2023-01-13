@@ -4,7 +4,7 @@ public interface ValidacoesVeiculosInterface{
 
     boolean validaPlaca(String placaVeiculo);
 
-    boolean verificaTamanhoDaPlaca(String placaVeiculo);
+    boolean placaContains(String partePlacaVeiculo);
 
     boolean validaRenavam(String renavam);
 
