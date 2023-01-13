@@ -126,9 +126,12 @@ public class VeiculoService implements VeiculoInterface{
 
     @Override
     public ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal) {
+        List<Veiculo> veiculosIntervalo;
         if (dataInicial.matches("(\\d{2}-\\d{2}-\\d{4})") && dataFinal.matches("(\\d{2}-\\d{2}-\\d{4})")
                 && validaData(dataInicial) && validaData(dataFinal)){
-            return ResponseEntity.ok(repository.findByintevalo(converteStringtoData(dataInicial), converteStringtoData(dataFinal)));
+            veiculosIntervalo = repository.findByintevalo(converteStringtoData(dataInicial), converteStringtoData(dataFinal));
+            return !veiculosIntervalo.isEmpty() ? ResponseEntity.ok(veiculosIntervalo) :
+                    ResponseEntity.ok("Não há registros de veculos adquiridos no intervalo informado!");
         }
         return ResponseEntity.ok("Por favor informe uma data válida! Ex: 31-12-2022");
     }
