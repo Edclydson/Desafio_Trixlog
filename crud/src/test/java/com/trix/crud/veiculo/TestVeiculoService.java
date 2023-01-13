@@ -16,10 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -247,5 +248,25 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("A placa informada não é válida!",response.getBody());
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOkComListaDeVeiculosConformeIntervalo_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
+        List<Veiculo> listaDeVeiculos = new ArrayList<>();
+        listaDeVeiculos.add(veiculo);
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        DateTimeFormatter dataFormatoInserido = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dataFormatoNecessario = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        date.setLenient(false);
+        Date dataInicial = date.parse(LocalDate.parse("01-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
+        Date dataFinal = date.parse(LocalDate.parse("13-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
+        Mockito.when(repository.findByintevalo(dataInicial,dataFinal)).thenReturn(listaDeVeiculos);
+
+        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","13-01-2023");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(ArrayList.class,response.getBody().getClass());
+        Mockito.verify(repository).findByintevalo(ArgumentMatchers.any(Date.class),ArgumentMatchers.any(Date.class));
     }
 }
