@@ -313,4 +313,56 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Por favor informe uma data válida! Ex: 31-12-2022",response.getBody());
     }
+
+    @Test
+    void DeveRetornarStatusCodeOKComSucesso_AoAlterarDadosVeiculo(){
+        Mockito.when(repository.findById(novoveiculo.getRenavamNovoVeiculo())).thenReturn(Optional.of(veiculo));
+        Mockito.when(repository.save(veiculo)).thenReturn(veiculo);
+
+        ResponseEntity response = service.alterarDadosVeiculo(novoveiculo);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Alterações salvas com sucesso",response.getBody());
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoAlterarDadosVeiculo(){
+        // veiculo não consta na base de dados
+        Mockito.when(repository.findById(novoveiculo.getRenavamNovoVeiculo())).thenReturn(Optional.empty());
+
+        ResponseEntity response = service.alterarDadosVeiculo(novoveiculo);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Não existe nenhum veiculo com o renavam informado!",response.getBody());
+
+    }
+
+    @Test
+    void DeveRetornarStatusCodeNoContent_AoDeletarVeiculo(){
+        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
+
+        ResponseEntity response = service.deletarVeiculo("44745162039");
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+        Mockito.verify(repository).deleteById(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoDeletarVeiculo(){
+        //renavam invalido
+
+        ResponseEntity response = service.deletarVeiculo("4474516203");
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Informe um renavam válido!",response.getBody());
+
+        // veiculo não encontrado
+        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.empty());
+
+        response = service.deletarVeiculo("44745162039");
+
+        assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+
+    }
 }
