@@ -5,7 +5,6 @@ import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.service.VeiculoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,8 +16,12 @@ import java.util.List;
 @Api(tags = {"Controlador de Veículos"})
 public class VeiculoController {
     
-    @Autowired
-    VeiculoService service;
+
+    private final VeiculoService service;
+
+    public VeiculoController(VeiculoService service) {
+        this.service = service;
+    }
 
     @PostMapping("/cadastraveiculo")
     @ApiOperation(value = "Realiza o registro de um novo veículo")

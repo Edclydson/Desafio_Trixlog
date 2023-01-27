@@ -6,7 +6,6 @@ import com.trix.crud.modelo.Condutor;
 import com.trix.crud.service.CondutorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,8 +17,11 @@ import java.util.List;
 @Api(tags = {"Controlador de Condutores"})
 public class CondutorController {
 
-    @Autowired
-    CondutorService service;
+    private final CondutorService service;
+
+    public CondutorController(CondutorService service) {
+        this.service = service;
+    }
 
     @PostMapping("/cadastrocondutor")
     @ApiOperation(value = "Realiza o registro de um novo condutor")
