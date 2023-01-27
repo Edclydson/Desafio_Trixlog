@@ -1,13 +1,13 @@
 package com.trix.crud.service.interfaces;
 
 public interface ValidacoesCondutorInterface{
-    boolean verificaCnhCondutor(String cnh);
+    boolean cnhValida(String cnh);
 
-    boolean verificaNomeCondutor(String nome);
+    boolean nomeCondutor(String nome);
 
-    boolean verificacaoParaAquisicaoVeiculo(String cnh);
+    boolean requisitosAquisicaoVeiculo(String cnh);
 
-    boolean verificacaoSeCondutorTemVeiculo(String cnh);
+    boolean temAlgumVeiculo(String cnh);
 
-    boolean verificaSeCondutorPossuioVeiculo(String renavam, String cnh);
+    boolean possuiOVeiculo(String renavam, String cnh);
 }

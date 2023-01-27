@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface CondutorInterface extends ValidacoesCondutorInterface{
+public interface CondutorInterface {
 
     boolean cadastraNovoCondutor(NovoCondutor novoCondutor);
 
@@ -19,10 +19,6 @@ public interface CondutorInterface extends ValidacoesCondutorInterface{
     ResponseEntity deletaCondutor(String cnh);
 
     ResponseEntity buscaNomeCondutor(String nomeCondutor);
-
-    Condutor geraCondutor(NovoCondutor novoCondutor);
-
-    Condutor alteracaoCondutor(Condutor condutorComAlteracao);
 
     ResponseEntity adquirirVeiculo(String renavam, String cnh);
 
