@@ -6,7 +6,6 @@ import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
 import com.trix.crud.repository.VeiculoRepository;
 import com.trix.crud.service.interfaces.CondutorInterface;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,19 +16,32 @@ import java.util.List;
 @Service
 public class CondutorService implements CondutorInterface{
 
-    @Autowired
-    CondutorRepository repository;
 
-    @Autowired
-    VeiculoRepository veiculoRepository;
+    private final CondutorRepository repository;
 
-    @Autowired
-    VeiculoService veiculoService;
+    private final VeiculoRepository veiculoRepository;
+
+    private final VeiculoService veiculoService;
+
+    private final CondutorValidacoes valida;
+
+    private final CondutorAcoes acao;
+
+    public CondutorService(CondutorRepository repository,
+                           VeiculoRepository veiculoRepository,
+                           VeiculoService veiculoService, CondutorValidacoes valida, CondutorAcoes acao) {
+        this.repository = repository;
+        this.veiculoRepository = veiculoRepository;
+        this.veiculoService = veiculoService;
+        this.valida = valida;
+        this.acao = acao;
+    }
+
 
     @Override
     public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
-        if(verificaCnhCondutor(novoCondutor.getNumCnh()) && verificaNomeCondutor(novoCondutor.getNome())){
-            repository.save(geraCondutor(novoCondutor));
+        if(valida.cnhValida(novoCondutor.getNumCnh()) && valida.nomeCondutor(novoCondutor.getNome())){
+            repository.save(acao.geraCondutor(novoCondutor));
             return true;
         }else{
             return false;
@@ -38,15 +50,13 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public List<Condutor> consultaTodosCondutores(){
-        try{
-            return (List<Condutor>) repository.findAll();
-        }catch (ClassCastException e ){e.printStackTrace();}
-        return Collections.emptyList();
+            List<Condutor> todosCondutores = repository.findAll();
+            return todosCondutores.isEmpty() ? Collections.emptyList() : todosCondutores;
     }
 
     @Override
     public ResponseEntity consultaCondutorcnh(String cnh){
-        if(verificaCnhCondutor(cnh)){
+        if(valida.cnhValida(cnh)){
             if(repository.findById(cnh).isPresent())
                 return ResponseEntity.ok(repository.findById(cnh).get());
             else{
@@ -58,8 +68,8 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity alteraCondutor(Condutor condutor){
-       if(verificaNomeCondutor(condutor.getNomeCondutor())){
-           repository.save(alteracaoCondutor(condutor));
+       if(valida.nomeCondutor(condutor.getNomeCondutor())){
+           repository.save(acao.alteracaoCondutor(condutor));
            return ResponseEntity.ok("Alterações salvas com sucesso!");
        }
        return ResponseEntity.ok("Houve um problema ao salvar as alterações");
@@ -67,7 +77,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity deletaCondutor(String cnh){
-        if(verificaCnhCondutor(cnh) && repository.findById(cnh).isPresent()){
+        if(valida.cnhValida(cnh) && repository.findById(cnh).isPresent()){
             repository.deleteById(cnh);
             return ResponseEntity.noContent().build();
         }else{
@@ -78,7 +88,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity buscaNomeCondutor(String nomeCondutor){
-        if(verificaNomeCondutor(nomeCondutor)){
+        if(valida.nomeCondutor(nomeCondutor)){
             if(nomeCondutor.contains(" ")){
                 return ResponseEntity.ok(repository.findByNomeCondutor(nomeCondutor));
             }
@@ -87,36 +97,10 @@ public class CondutorService implements CondutorInterface{
         return ResponseEntity.ok("Nome inválido!");
     }
 
-    @Override
-    public boolean verificaCnhCondutor(String cnh){
-        return cnh.matches("(?=.*\\d).{11}") && !cnh.matches("(?=.*[a-zA-Z} {,.^?~=+_/*|]).+");
-    }
 
-    @Override
-    public boolean verificaNomeCondutor(String nome){
-        return !nome.isBlank() && nome.matches("(?=.*[a-zA-Z]).{2,}") && !nome.matches("(?=.*\\d).+");
-    }
-
-    @Override
-    public Condutor geraCondutor(NovoCondutor novoCondutor){
-        Condutor condutor = new Condutor();
-        condutor.setNomeCondutor(novoCondutor.getNome());
-        condutor.setNumeroCnh(novoCondutor.getNumCnh());
-        condutor.setListaDeVeiculos(new ArrayList<>());
-        return condutor;
-
-    }
-
-    @Override
-    public Condutor alteracaoCondutor(Condutor condutorComAlteracao){
-        Condutor existente = repository.findById(condutorComAlteracao.getNumeroCnh()).get();
-        existente.setNomeCondutor(condutorComAlteracao.getNomeCondutor());
-        return existente;
-    }
-
-    @Override
+    @Override //PRECISA MELHORAR
     public ResponseEntity adquirirVeiculo(String renavam, String cnh){
-        if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && verificacaoParaAquisicaoVeiculo(cnh)){
+        if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && valida.requisitosAquisicaoVeiculo(cnh)){
             Condutor condutorComVeiculo = repository.findById(cnh).get();
             List<Veiculo> novaLista = new ArrayList<>(condutorComVeiculo.getListaDeVeiculos());
             novaLista.add(veiculoRepository.findById(renavam).get());
@@ -128,38 +112,17 @@ public class CondutorService implements CondutorInterface{
         return ResponseEntity.ok("Para adquerir um veiculo informe os dados corretamente.");
     }
 
-    @Override
-    public ResponseEntity liberarVeiculo(String renavam, String cnh){
-        if(verificacaoSeCondutorTemVeiculo(cnh) && verificaSeCondutorPossuioVeiculo(renavam, cnh)
-        && verificaCnhCondutor(cnh)){
+    @Override  //PRECISA MELHORAR
+    public ResponseEntity liberarVeiculo(String renavam, String cnh) {
+        if (valida.temAlgumVeiculo(cnh) && valida.possuiOVeiculo(renavam, cnh)
+                && valida.cnhValida(cnh)){
             Condutor condutor = repository.findById(cnh).get();
             List<Veiculo> novaLista = new ArrayList<>(condutor.getListaDeVeiculos());
             novaLista.remove(veiculoService.LiberacaoVeiculo(renavam));
             condutor.setListaDeVeiculos(novaLista);
             repository.save(condutor);
-            return ResponseEntity.ok("O Condutor não tem mais posse do veículo: " +renavam);
+            return ResponseEntity.ok("O Condutor não tem mais posse do veículo: " + renavam);
         }
         return ResponseEntity.ok("Requisição não foi processada! Tente novamente.");
-    }
-    @Override
-    public boolean verificacaoParaAquisicaoVeiculo(String cnh){
-        return verificaCnhCondutor(cnh) && repository.existsById(cnh);
-    }
-
-    @Override
-    public boolean verificacaoSeCondutorTemVeiculo(String cnh){
-            Condutor condutor = repository.findById(cnh).get();
-            return (repository.existsById(cnh) && !condutor.getListaDeVeiculos().isEmpty());
-    }
-
-    @Override
-    public boolean verificaSeCondutorPossuioVeiculo(String renavam, String cnh){
-        List<Veiculo> veiculosCondutor = new ArrayList<>(repository.findById(cnh).get().getListaDeVeiculos());
-        for(Veiculo veiculo : veiculosCondutor){
-            if(veiculo.getRenavam().equals(renavam)){
-                return true;
-            }
-        }
-        return false;
     }
 }
