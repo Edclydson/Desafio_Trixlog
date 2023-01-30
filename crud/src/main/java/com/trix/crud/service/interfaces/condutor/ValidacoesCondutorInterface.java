@@ -1,4 +1,4 @@
-package com.trix.crud.service.interfaces;
+package com.trix.crud.service.interfaces.condutor;
 
 public interface ValidacoesCondutorInterface{
     boolean cnhValida(String cnh);

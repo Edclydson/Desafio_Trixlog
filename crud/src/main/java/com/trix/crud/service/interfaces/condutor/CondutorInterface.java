@@ -1,4 +1,4 @@
-package com.trix.crud.service.interfaces;
+package com.trix.crud.service.interfaces.condutor;
 
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;

@@ -2,16 +2,15 @@ package com.trix.crud.service;
 
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
-import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
 import com.trix.crud.repository.VeiculoRepository;
-import com.trix.crud.service.interfaces.CondutorInterface;
+import com.trix.crud.service.interfaces.condutor.CondutorInterface;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CondutorService implements CondutorInterface{
@@ -57,13 +56,11 @@ public class CondutorService implements CondutorInterface{
     @Override
     public ResponseEntity consultaCondutorcnh(String cnh){
         if(valida.cnhValida(cnh)){
-            if(repository.findById(cnh).isPresent())
-                return ResponseEntity.ok(repository.findById(cnh).get());
-            else{
-                return ResponseEntity.ok("Condutor não encontrado!");
-            }
+            Optional<Condutor> condutorBuscado = repository.findById(cnh);
+            return condutorBuscado.isPresent()? ResponseEntity.ok(condutorBuscado.get())
+                    : ResponseEntity.ok("Condutor não encontrado!");
         }
-            return ResponseEntity.ok("CNH informada não é válida!");
+        return ResponseEntity.ok("CNH informada não é válida!");
     }
 
     @Override
@@ -89,38 +86,27 @@ public class CondutorService implements CondutorInterface{
     @Override
     public ResponseEntity buscaNomeCondutor(String nomeCondutor){
         if(valida.nomeCondutor(nomeCondutor)){
-            if(nomeCondutor.contains(" ")){
-                return ResponseEntity.ok(repository.findByNomeCondutor(nomeCondutor));
-            }
-            return ResponseEntity.ok(repository.findByNomeCondutorContaining(nomeCondutor));
+            return nomeCondutor.contains(" ") ? ResponseEntity.ok(repository.findByNomeCondutor(nomeCondutor))
+                    : ResponseEntity.ok(repository.findByNomeCondutorContaining(nomeCondutor));
         }
         return ResponseEntity.ok("Nome inválido!");
     }
 
 
-    @Override //PRECISA MELHORAR
+    @Override
     public ResponseEntity adquirirVeiculo(String renavam, String cnh){
         if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && valida.requisitosAquisicaoVeiculo(cnh)){
-            Condutor condutorComVeiculo = repository.findById(cnh).get();
-            List<Veiculo> novaLista = new ArrayList<>(condutorComVeiculo.getListaDeVeiculos());
-            novaLista.add(veiculoRepository.findById(renavam).get());
-            condutorComVeiculo.setListaDeVeiculos(novaLista);
-            repository.save(condutorComVeiculo);
+            repository.save(acao.acquireProcess(cnh,renavam));
             veiculoService.atribuirCondutorAoVeiculo(renavam, cnh);
             return ResponseEntity.ok("Veículo adquirido com sucesso");
         }
         return ResponseEntity.ok("Para adquerir um veiculo informe os dados corretamente.");
     }
 
-    @Override  //PRECISA MELHORAR
+    @Override
     public ResponseEntity liberarVeiculo(String renavam, String cnh) {
-        if (valida.temAlgumVeiculo(cnh) && valida.possuiOVeiculo(renavam, cnh)
-                && valida.cnhValida(cnh)){
-            Condutor condutor = repository.findById(cnh).get();
-            List<Veiculo> novaLista = new ArrayList<>(condutor.getListaDeVeiculos());
-            novaLista.remove(veiculoService.LiberacaoVeiculo(renavam));
-            condutor.setListaDeVeiculos(novaLista);
-            repository.save(condutor);
+        if (valida.temAlgumVeiculo(cnh) && valida.possuiOVeiculo(renavam, cnh) && valida.cnhValida(cnh)){
+            repository.save(acao.loseProcess(cnh,renavam));
             return ResponseEntity.ok("O Condutor não tem mais posse do veículo: " + renavam);
         }
         return ResponseEntity.ok("Requisição não foi processada! Tente novamente.");

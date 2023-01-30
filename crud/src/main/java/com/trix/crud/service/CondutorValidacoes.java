@@ -3,7 +3,7 @@ package com.trix.crud.service;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
-import com.trix.crud.service.interfaces.ValidacoesCondutorInterface;
+import com.trix.crud.service.interfaces.condutor.ValidacoesCondutorInterface;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
