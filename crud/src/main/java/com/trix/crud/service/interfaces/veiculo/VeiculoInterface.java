@@ -1,18 +1,15 @@
-package com.trix.crud.service.interfaces;
+package com.trix.crud.service.interfaces.veiculo;
 
 import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Veiculo;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
-public interface VeiculoInterface extends ValidacoesVeiculosInterface{
+public interface VeiculoInterface {
 
     ResponseEntity cadastrarNovoVeiculo(NovoVeiculo novoVeiculo, URI uri);
-
-    Veiculo criaVeiculo(NovoVeiculo novoVeiculo);
 
     List<Veiculo> findAll();
 
@@ -29,15 +26,5 @@ public interface VeiculoInterface extends ValidacoesVeiculosInterface{
     ResponseEntity alterarDadosVeiculo(NovoVeiculo veiculo);
 
     ResponseEntity deletarVeiculo(String renavam);
-
-    Veiculo atualizacaoDados(NovoVeiculo veiculo, Veiculo existente);
-
-    boolean atribuirCondutorAoVeiculo(String renavam, String cnh);
-
-    Veiculo LiberacaoVeiculo(String renavam);
-
-    Date dataDaAquisicao();
-
-    Date converteStringtoData(String data);
 
 }
