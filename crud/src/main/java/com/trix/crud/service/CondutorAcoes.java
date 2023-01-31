@@ -4,7 +4,6 @@ import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
-import com.trix.crud.repository.VeiculoRepository;
 import com.trix.crud.service.interfaces.condutor.AcoesCondutor;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +14,10 @@ import java.util.List;
 public class CondutorAcoes implements AcoesCondutor{
 
     private final CondutorRepository repository;
-    private final VeiculoRepository veiculoRepository;
     private final VeiculoAcoes veiculoAcao;
 
-    public CondutorAcoes(CondutorRepository repository, VeiculoRepository veiculoRepository, VeiculoAcoes veiculoAcao) {
+    public CondutorAcoes(CondutorRepository repository, VeiculoAcoes veiculoAcao) {
         this.repository = repository;
-        this.veiculoRepository = veiculoRepository;
         this.veiculoAcao = veiculoAcao;
     }
 
