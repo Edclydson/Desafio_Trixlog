@@ -16,12 +16,12 @@ public class CondutorAcoes implements AcoesCondutor{
 
     private final CondutorRepository repository;
     private final VeiculoRepository veiculoRepository;
-    private final VeiculoService service;
+    private final VeiculoAcoes veiculoAcao;
 
-    public CondutorAcoes(CondutorRepository repository, VeiculoRepository veiculoRepository, VeiculoService service) {
+    public CondutorAcoes(CondutorRepository repository, VeiculoRepository veiculoRepository, VeiculoAcoes veiculoAcao) {
         this.repository = repository;
         this.veiculoRepository = veiculoRepository;
-        this.service = service;
+        this.veiculoAcao = veiculoAcao;
     }
 
     @Override
@@ -44,9 +44,7 @@ public class CondutorAcoes implements AcoesCondutor{
     public Condutor acquireProcess(String cnh, String renavam) {
         Condutor condutorComVeiculo = repository.findById(cnh).get();
         List<Veiculo> novaLista = new ArrayList<>(condutorComVeiculo.getListaDeVeiculos());
-        //REMOVER ESSE VEICULO REPOSITORY PARA UM METODO VEICULO SERVICE
-        novaLista.add(veiculoRepository.findById(renavam).get());
-        condutorComVeiculo.setListaDeVeiculos(novaLista);
+        condutorComVeiculo.setListaDeVeiculos(veiculoAcao.addVeiculoListaCondutor(novaLista, renavam));
         return condutorComVeiculo;
     }
 
@@ -54,7 +52,7 @@ public class CondutorAcoes implements AcoesCondutor{
     public Condutor loseProcess(String cnh, String renavam) {
         Condutor condutor = repository.findById(cnh).get();
         List<Veiculo> novaLista = new ArrayList<>(condutor.getListaDeVeiculos());
-        novaLista.remove(service.LiberacaoVeiculo(renavam));
+        novaLista.remove(veiculoAcao.LiberacaoVeiculo(renavam));
         condutor.setListaDeVeiculos(novaLista);
         return condutor;
     }

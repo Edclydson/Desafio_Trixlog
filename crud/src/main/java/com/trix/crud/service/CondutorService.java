@@ -3,7 +3,6 @@ package com.trix.crud.service;
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.repository.CondutorRepository;
-import com.trix.crud.repository.VeiculoRepository;
 import com.trix.crud.service.interfaces.condutor.CondutorInterface;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,21 +17,21 @@ public class CondutorService implements CondutorInterface{
 
     private final CondutorRepository repository;
 
-    private final VeiculoRepository veiculoRepository;
-
-    private final VeiculoService veiculoService;
-
     private final CondutorValidacoes valida;
 
     private final CondutorAcoes acao;
 
+    private final VeiculoValidacoes veiculoValidacoes;
+
+    private final VeiculoAcoes veiculoAcoes;
+
+
     public CondutorService(CondutorRepository repository,
-                           VeiculoRepository veiculoRepository,
-                           VeiculoService veiculoService, CondutorValidacoes valida, CondutorAcoes acao) {
+                           CondutorValidacoes valida, VeiculoValidacoes veiculoValidacoes, VeiculoAcoes veiculoAcoes, CondutorAcoes acao) {
         this.repository = repository;
-        this.veiculoRepository = veiculoRepository;
-        this.veiculoService = veiculoService;
         this.valida = valida;
+        this.veiculoValidacoes = veiculoValidacoes;
+        this.veiculoAcoes = veiculoAcoes;
         this.acao = acao;
     }
 
@@ -95,9 +94,9 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity adquirirVeiculo(String renavam, String cnh){
-        if(veiculoService.verificacaoVeiculoParaAquisicao(renavam) && valida.requisitosAquisicaoVeiculo(cnh)){
+        if(veiculoValidacoes.requisitosAquisicaoVeiculo(renavam) && valida.requisitosAquisicaoVeiculo(cnh)){
             repository.save(acao.acquireProcess(cnh,renavam));
-            veiculoService.atribuirCondutorAoVeiculo(renavam, cnh);
+            veiculoAcoes.atribuirCondutorAoVeiculo(renavam, cnh);
             return ResponseEntity.ok("Veículo adquirido com sucesso");
         }
         return ResponseEntity.ok("Para adquerir um veiculo informe os dados corretamente.");
