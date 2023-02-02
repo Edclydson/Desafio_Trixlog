@@ -154,43 +154,38 @@ public class TestCondutorService extends ApplicationConfigTest {
 
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
     }
-//
-//    @Test
-//    void DeveRetornarStatusCodeOK_AoAlterarCondutor(){
-//        Condutor condutorAlterado = new Condutor();
-//        condutorAlterado.setNomeCondutor("Leidson Melo");
-//        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
-//        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
-//
-//        Mockito.when(repository.findById(condutorAlterado.getNumeroCnh())).thenReturn(Optional.of(condutorAlterado));
-//        Mockito.when(repository.save(condutorAlterado)).thenReturn(condutor);
-//
-//
-//        ResponseEntity resultado = service.alteraCondutor(condutorAlterado);
-//        assertEquals(HttpStatus.OK,resultado.getStatusCode());
-//        assertEquals("Alterações salvas com sucesso!",resultado.getBody());
-//        Mockito.verify(repository).save(ArgumentMatchers.any(Condutor.class));
-//    }
-//
-//    @Test
-//    void DeveRetornarStatusCodeOKComErro_AoAlterarCondutor(){
-//        Condutor condutorAlterado = new Condutor();
-//        condutorAlterado.setNomeCondutor(condutor.getNumeroCnh());
-//        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
-//        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
-//
-//        Mockito.when(condutorAlterado.getNomeCondutor()).thenReturn(String.valueOf(false));
-//
-//
-//        ResponseEntity resultado = service.alteraCondutor(condutorAlterado);
-//        assertEquals(HttpStatus.OK,resultado.getStatusCode());
-//        assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
-//
-//        condutorAlterado.setNomeCondutor("Le1dson Mel0");
-//        resultado = service.alteraCondutor(condutorAlterado);
-//        assertEquals(HttpStatus.OK,resultado.getStatusCode());
-//        assertEquals("Houve um problema ao salvar as alterações", resultado.getBody());
-//    }
+
+    @Test
+    void DeveRetornarStatusCodeOK_AoAlterarCondutor(){
+        Condutor condutorAlterado = new Condutor();
+        condutorAlterado.setNomeCondutor("Leidson Melo");
+        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
+        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
+
+        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(true);
+        Mockito.when(acao.alteracaoCondutor(condutorAlterado)).thenReturn(condutorAlterado);
+
+        ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
+
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+        assertEquals("Alterações salvas com sucesso!",resultado.getBody());
+        Mockito.verify(repository).save(ArgumentMatchers.any(Condutor.class));
+    }
+
+    @Test
+    void DeveRetornarStatusCodeOKComErro_AoAlterarCondutor(){
+        Condutor condutorAlterado = new Condutor();
+        condutorAlterado.setNomeCondutor("Leidson Melo");
+        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
+        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
+
+        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(false);
+
+
+        ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+        assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
+    }
 //
 //    @Test
 //    void DeveRetornarStatusCodeNoContent_AoExcluirCondutor(){
