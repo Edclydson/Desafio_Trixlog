@@ -10,4 +10,6 @@ public interface ValidacoesCondutorInterface{
     boolean temAlgumVeiculo(String cnh);
 
     boolean possuiOVeiculo(String renavam, String cnh);
+
+    boolean existe(String cnh);
 }

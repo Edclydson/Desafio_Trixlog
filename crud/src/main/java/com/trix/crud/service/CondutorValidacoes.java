@@ -49,4 +49,10 @@ public class CondutorValidacoes implements ValidacoesCondutorInterface{
         }
         return false;
     }
+
+    @Override
+    public boolean existe(String cnh) {
+        return repository.existsById(cnh);
+    }
+
 }

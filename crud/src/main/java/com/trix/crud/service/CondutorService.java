@@ -64,7 +64,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity alteraCondutor(Condutor condutor){
-       if(valida.nomeCondutor(condutor.getNomeCondutor())){
+       if(valida.nomeCondutor(condutor.getNomeCondutor()) && valida.existe(condutor.getNumeroCnh())){
            repository.save(acao.alteracaoCondutor(condutor));
            return ResponseEntity.ok("Alterações salvas com sucesso!");
        }
