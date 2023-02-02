@@ -12,10 +12,13 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -121,23 +124,36 @@ public class TestCondutorService extends ApplicationConfigTest {
         assertEquals(ArrayList.class,resultado.getClass());
         Mockito.verify(repository).findAll();
     }
-//
-//    @Test
-//    void DeveConsultarCondutorPelaCnh(){
-//
-//        Mockito.when(repository.findById(ArgumentMatchers.anyString()))
-//                .thenReturn(Optional.of(condutor));
-//
-//        ResponseEntity resultado = service.consultaCondutorcnh(condutor.getNumeroCnh());
-//
-//        assertNotNull(resultado);
-//        assertNotNull(resultado.getBody());
-//        assertEquals(condutor,resultado.getBody());
-//        assertEquals(HttpStatus.OK,resultado.getStatusCode());
-//
-//        Mockito.verify(repository,Mockito.times(2)).findById(ArgumentMatchers.anyString());
-//    }
-//
+
+    @Test
+    void DeveRetornarSucesso_AoConsultarCondutorPelaCnh(){
+        condutor = new Condutor();
+        condutor.setNomeCondutor(novoCondutor.getNome());
+        condutor.setNumeroCnh(novoCondutor.getNumCnh());
+        condutor.setListaDeVeiculos(Collections.emptyList());
+
+        Mockito.when(repository.findById(condutor.getNumeroCnh()))
+                .thenReturn(Optional.of(condutor));
+        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
+
+        ResponseEntity resultado = condutorService.consultaCondutorcnh(condutor.getNumeroCnh());
+
+        assertNotNull(resultado);
+        assertNotNull(resultado.getBody());
+        assertEquals(Condutor.class,resultado.getBody().getClass());
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+
+        Mockito.verify(repository).findById(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarFalha_AoConsultarCondutorPelaCnh(){
+        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(false);
+
+        ResponseEntity resultado = condutorService.consultaCondutorcnh(condutor.getNumeroCnh());
+
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+    }
 //
 //    @Test
 //    void DeveRetornarStatusCodeOK_AoAlterarCondutor(){
