@@ -73,7 +73,7 @@ public class CondutorService implements CondutorInterface{
 
     @Override
     public ResponseEntity deletaCondutor(String cnh){
-        if(valida.cnhValida(cnh) && repository.findById(cnh).isPresent()){
+        if(valida.cnhValida(cnh) && valida.existe(cnh)){
             repository.deleteById(cnh);
             return ResponseEntity.noContent().build();
         }else{
