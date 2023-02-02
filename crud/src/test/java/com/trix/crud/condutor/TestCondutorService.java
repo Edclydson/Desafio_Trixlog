@@ -163,6 +163,7 @@ public class TestCondutorService extends ApplicationConfigTest {
         condutorAlterado.setListaDeVeiculos(Collections.emptyList());
 
         Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(true);
+        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(true);
         Mockito.when(acao.alteracaoCondutor(condutorAlterado)).thenReturn(condutorAlterado);
 
         ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
@@ -180,7 +181,7 @@ public class TestCondutorService extends ApplicationConfigTest {
         condutorAlterado.setListaDeVeiculos(Collections.emptyList());
 
         Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(false);
-
+        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(true);
 
         ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
