@@ -194,19 +194,38 @@ public class TestCondutorService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
     }
-//
-//    @Test
-//    void DeveRetornarNoContent_AoExcluirCondutor(){
-//
-//        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
-//        Mockito.when(repository.findById(condutor.getNumeroCnh())).thenReturn(Optional.of(condutor));
-//
-//
-//        ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
-//        assertEquals(HttpStatus.NO_CONTENT,resultado.getStatusCode());
-//        Mockito.verify(repository).findById(ArgumentMatchers.anyString());
-//    }
-//
+
+    @Test
+    void DeveRetornarNoContent_AoExcluirCondutor(){
+
+        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(true);
+
+        ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
+
+        assertEquals(HttpStatus.NO_CONTENT,resultado.getStatusCode());
+        Mockito.verify(repository).deleteById(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarOK_AoExcluirCondutor(){
+
+        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(false);
+        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(true);
+
+        ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
+
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+
+
+        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(false);
+
+        resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
+
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+    }
+
 //    @Test
 //    void DeveRetornarSucesso_AdquirirVeiculo(){
 //        condutor = new Condutor();
