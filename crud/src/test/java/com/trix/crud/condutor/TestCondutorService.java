@@ -186,35 +186,24 @@ public class TestCondutorService extends ApplicationConfigTest {
         ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
+
+        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(true);
+        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(false);
+
+        resultado = condutorService.alteraCondutor(condutorAlterado);
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+        assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
     }
 //
 //    @Test
-//    void DeveRetornarStatusCodeNoContent_AoExcluirCondutor(){
-//        condutor = new Condutor();
-//        condutor.setNomeCondutor("Edclydson Sousa");
-//        condutor.setNumeroCnh("77546831291");
-//        condutor.setListaDeVeiculos(Collections.emptyList());
+//    void DeveRetornarNoContent_AoExcluirCondutor(){
 //
+//        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
 //        Mockito.when(repository.findById(condutor.getNumeroCnh())).thenReturn(Optional.of(condutor));
 //
-//        ResponseEntity resultado = service.deletaCondutor(condutor.getNumeroCnh());
+//
+//        ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
 //        assertEquals(HttpStatus.NO_CONTENT,resultado.getStatusCode());
-//        Mockito.verify(repository, Mockito.times(1)).deleteById(ArgumentMatchers.anyString());
-//        Mockito.verify(repository, Mockito.times(1)).findById(ArgumentMatchers.anyString());
-//    }
-//
-//    @Test
-//    void DeveRetornarStatusCodeOK_AoExcluirCondutor(){
-//        condutor = new Condutor();
-//        condutor.setNomeCondutor("Edclydson Sousa");
-//        condutor.setNumeroCnh("77546831291");
-//        condutor.setListaDeVeiculos(Collections.emptyList());
-//
-//        Mockito.when(repository.findById(condutor.getNumeroCnh())).thenReturn(Optional.empty());
-//
-//        ResponseEntity resultado = service.deletaCondutor(condutor.getNumeroCnh());
-//        assertEquals(HttpStatus.OK,resultado.getStatusCode());
-//        assertEquals("Houve um problema na hora de remover o condutor",resultado.getBody());
 //        Mockito.verify(repository).findById(ArgumentMatchers.anyString());
 //    }
 //
