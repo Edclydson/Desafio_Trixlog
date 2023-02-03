@@ -86,4 +86,9 @@ public class VeiculoValidacoes implements ValidacoesVeiculosInterface{
             return false;
         }
     }
+
+    @Override
+    public boolean formatoData(String dataInicio, String dataFinal){
+        return dataInicio.matches("(\\d{2}-\\d{2}-\\d{4})") && dataFinal.matches("(\\d{2}-\\d{2}-\\d{4})");
+    }
 }
