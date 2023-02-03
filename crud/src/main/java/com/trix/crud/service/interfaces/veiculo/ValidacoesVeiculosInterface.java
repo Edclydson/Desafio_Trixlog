@@ -19,4 +19,6 @@ public interface ValidacoesVeiculosInterface{
     boolean requisitosAquisicaoVeiculo(String renavam);
 
     boolean data(String data);
+
+    boolean formatoData(String dataInicio, String dataFinal);
 }
