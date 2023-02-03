@@ -107,8 +107,10 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComOptionalDeVeiculo_AoBuscarVeiculoPeloRenavam(){
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
+    void DeveRetornarStatusCodeOKComSucesso_AoBuscarVeiculoPeloRenavam(){
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(repository.findById(ArgumentMatchers.anyString())).thenReturn(Optional.of(veiculo));
 
         ResponseEntity response = service.buscaVeiculoComRenavam("44745162039");
 
@@ -116,14 +118,15 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(Optional.class, response.getBody().getClass());
         assertEquals(Optional.of(veiculo),response.getBody());
         assertEquals(HttpStatus.OK,response.getStatusCode());
-        Mockito.verify(repository,Mockito.times(2)).findById(ArgumentMatchers.anyString());
+        Mockito.verify(repository).findById(ArgumentMatchers.anyString());
 
     }
 
     @Test
     void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPeloRenavam(){
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(true);
         //veiculo não cadastrado
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.empty());
 
         ResponseEntity response = service.buscaVeiculoComRenavam("44745162039");
 
@@ -131,23 +134,23 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals("Veículo não encontrado!",response.getBody());
         assertEquals(HttpStatus.OK,response.getStatusCode());
 
-        //renavam com letra
+
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(false);
+        //renavam invalido
+
         response = service.buscaVeiculoComRenavam("44745162O39");
 
         assertEquals("O renavam 44745162O39 não é válido!", response.getBody());
-
-        //renavam com caracteres especiais
-        response = service.buscaVeiculoComRenavam("+4745162039");
-
-        assertEquals("O renavam +4745162039 não é válido!", response.getBody());
-
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComListaDeVeiculos_AoBuscarVeiculoPelaUfDaPlaca(){
+    void DeveRetornarOKComSucesso_AoBuscarVeiculoPelaUfDaPlaca(){
         List<Veiculo> listaDeVeiculos = new ArrayList<>();
         listaDeVeiculos.add(veiculo);
-        Mockito.when(repository.findByufPlaca("RR")).thenReturn(listaDeVeiculos);
+        Mockito.when(validacao.uf(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.ufExiste(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findByufPlaca(ArgumentMatchers.anyString())).thenReturn(listaDeVeiculos);
 
         ResponseEntity response = service.buscaVeiculoComUfDaPlaca("RR");
 
@@ -160,6 +163,8 @@ class TestVeiculoService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPelaUfDaPlaca(){
+        Mockito.when(validacao.uf(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.ufExiste(ArgumentMatchers.anyString())).thenReturn(false);
         //passando uf inexistente
         ResponseEntity response = service.buscaVeiculoComUfDaPlaca("XA");
 
@@ -167,6 +172,9 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Digite uma localidade válida",response.getBody());
 
+
+        Mockito.when(validacao.uf(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(validacao.ufExiste(ArgumentMatchers.anyString())).thenReturn(true);
         //passando uf inválida
         response = service.buscaVeiculoComUfDaPlaca("*~");
 
@@ -174,24 +182,12 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Digite uma localidade válida",response.getBody());
 
-        //passando uf com três digitos
-        response = service.buscaVeiculoComUfDaPlaca("RRR");
+        Mockito.when(validacao.uf(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.ufExiste(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findByufPlaca(ArgumentMatchers.anyString())).thenReturn(Collections.emptyList());
+        //sem veiculos para a localidade informada
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals("Digite uma localidade válida",response.getBody());
-
-        //passando uf com um digito
-        response = service.buscaVeiculoComUfDaPlaca("R");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals("Digite uma localidade válida",response.getBody());
-
-        //não encontrou veiculos da UF informada
-        Mockito.when(repository.findByufPlaca("RR")).thenReturn(Collections.emptyList());
-
-        response = service.buscaVeiculoComUfDaPlaca("RR");
+        response = service.buscaVeiculoComUfDaPlaca("AC");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -200,11 +196,13 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComListaDeVeiculos_AoBuscarVeiculoPelaPlaca(){
+    void DeveRetornarOKComListaDeVeiculos_AoBuscarVeiculoPelaPlaca(){
         List<Veiculo> listaDeVeiculos = new ArrayList<>();
         listaDeVeiculos.add(veiculo);
+
+        Mockito.when(validacao.placa(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findByPlaca(ArgumentMatchers.anyString())).thenReturn(listaDeVeiculos);
         //passando a placa completa
-        Mockito.when(repository.findByPlaca("HWJ6E63")).thenReturn(listaDeVeiculos);
 
         ResponseEntity response = service.buscaVeiculoComPlaca("HWJ6E63");
 
@@ -212,8 +210,10 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,response.getStatusCode());
         Mockito.verify(repository).findByPlaca(ArgumentMatchers.anyString());
 
+
+        Mockito.when(validacao.placaContains(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(service.buscaPorParteDaPlaca(ArgumentMatchers.anyString())).thenReturn(listaDeVeiculos);
         //passando parte da placa
-        Mockito.when(repository.findByPlacaContaining("HWJ")).thenReturn(listaDeVeiculos);
 
         response = service.buscaVeiculoComPlaca("HWJ");
 
@@ -223,49 +223,52 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComErro_AoBuscarVeiculoPelaPlaca(){
-        //passando somente um digito da placa
-        ResponseEntity response = service.buscaVeiculoComPlaca("H");
+    void DeveRetornarOKComErro_AoBuscarVeiculoPelaPlaca(){
+        Mockito.when(validacao.placa(ArgumentMatchers.anyString())).thenReturn(false);
+
+        //passando formato invalido da placa
+        ResponseEntity response = service.buscaVeiculoComPlaca("HWJ6563");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("A placa informada não é válida!",response.getBody());
 
 
-        //passando digito inválido na placa
-        response = service.buscaVeiculoComPlaca("HWJ-");
+        Mockito.when(validacao.placa(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findByPlaca(ArgumentMatchers.anyString())).thenReturn(Collections.emptyList());
+
+        //informando placa completa e retornando nenhum veiculo
+        response = service.buscaVeiculoComPlaca("HWJ6563");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Não encontramos nenhum veículo",response.getBody());
+
+
+        Mockito.when(validacao.placaContains(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(service.buscaPorParteDaPlaca(ArgumentMatchers.anyString())).thenReturn(Collections.emptyList());
+        //passando parte da placa e retornando nenhum veiculo
+
+        response = service.buscaVeiculoComPlaca("HWJ");
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Não encontramos nenhum veículo",response.getBody());
+
+
+        Mockito.when(validacao.placaContains(ArgumentMatchers.anyString())).thenReturn(false);
+        //passando placa invalida
+
+        response = service.buscaVeiculoComPlaca("H*J");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("A placa informada não é válida!",response.getBody());
 
-
-        //passando mais de 7 digitos na placa
-        response = service.buscaVeiculoComPlaca("HWJ6E631");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals("A placa informada não é válida!",response.getBody());
-
-
-        //passando 7 digitos numericos
-        response = service.buscaVeiculoComPlaca("4516631");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals("A placa informada não é válida!",response.getBody());
-
-
-        //passando 7 letras
-        response = service.buscaVeiculoComPlaca("HWJIGFL");
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals("A placa informada não é válida!",response.getBody());
     }
 
     @Test
-    void DeveRetornarStatusCodeOkComListaDeVeiculosConformeIntervalo_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
+    void DeveRetornarOkComListaDeVeiculos_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
         List<Veiculo> listaDeVeiculos = new ArrayList<>();
         listaDeVeiculos.add(veiculo);
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
@@ -273,10 +276,13 @@ class TestVeiculoService extends ApplicationConfigTest {
         DateTimeFormatter dataFormatoNecessario = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         date.setLenient(false);
         Date dataInicial = date.parse(LocalDate.parse("01-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
-        Date dataFinal = date.parse(LocalDate.parse("13-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
-        Mockito.when(repository.findByintevalo(dataInicial,dataFinal)).thenReturn(listaDeVeiculos);
 
-        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","13-01-2023");
+        Mockito.when(repository.findByintevalo(ArgumentMatchers.any(Date.class),ArgumentMatchers.any(Date.class))).thenReturn(listaDeVeiculos);
+        Mockito.when(validacao.formatoData(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.data(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(acao.converteStringtoData(ArgumentMatchers.anyString())).thenReturn(dataInicial);
+
+        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","01-01-2023");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -285,18 +291,22 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOkComErro_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
+    void DeveRetornarOkComErro_AoBuscarVeiculosPeloIntervaloDeAquisicao() throws ParseException {
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
         DateTimeFormatter dataFormatoInserido = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         DateTimeFormatter dataFormatoNecessario = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         date.setLenient(false);
         Date dataInicial = date.parse(LocalDate.parse("01-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
-        Date dataFinal = date.parse(LocalDate.parse("13-01-2023", dataFormatoInserido).format(dataFormatoNecessario));
-        Mockito.when(repository.findByintevalo(dataInicial,dataFinal)).thenReturn(Collections.emptyList());
+
+        Mockito.when(repository.findByintevalo(ArgumentMatchers.any(Date.class),ArgumentMatchers.any(Date.class)))
+                .thenReturn(Collections.emptyList());
+        Mockito.when(validacao.formatoData(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.data(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(acao.converteStringtoData(ArgumentMatchers.anyString())).thenReturn(dataInicial);
 
         // informando um intervalo onde não há veiculos adquiridos
-        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","13-01-2023");
+        ResponseEntity response = service.buscaVeiculosComIntervaloAquisicao("01-01-2023","01-01-2023");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -305,6 +315,9 @@ class TestVeiculoService extends ApplicationConfigTest {
 
 
         // informando uma data inválida
+        Mockito.when(validacao.formatoData(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.data(ArgumentMatchers.anyString())).thenReturn(false);
+
         response = service.buscaVeiculosComIntervaloAquisicao("32-01-2023","13-01-2023");
 
         assertNotNull(response);
@@ -312,8 +325,10 @@ class TestVeiculoService extends ApplicationConfigTest {
         assertEquals("Por favor informe uma data válida! Ex: 31-12-2022",response.getBody());
 
 
-        // informando uma data com letras
-        response = service.buscaVeiculosComIntervaloAquisicao("O1-01-2023","13-01-2023");
+        // informando uma data com formato errado
+        Mockito.when(validacao.formatoData(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(validacao.data(ArgumentMatchers.anyString())).thenReturn(true);
+        response = service.buscaVeiculosComIntervaloAquisicao("O1-01-23","13-01-23");
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -321,6 +336,9 @@ class TestVeiculoService extends ApplicationConfigTest {
 
 
         // informando uma data com separadores diferentes
+        Mockito.when(validacao.formatoData(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(validacao.data(ArgumentMatchers.anyString())).thenReturn(true);
+
         response = service.buscaVeiculosComIntervaloAquisicao("01/01/2023","13/01/2023");
 
         assertNotNull(response);
@@ -329,9 +347,9 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComSucesso_AoAlterarDadosVeiculo(){
+    void DeveRetornarOKComSucesso_AoAlterarDadosVeiculo(){
         Mockito.when(repository.findById(novoveiculo.getRenavamNovoVeiculo())).thenReturn(Optional.of(veiculo));
-        Mockito.when(repository.save(veiculo)).thenReturn(veiculo);
+        Mockito.when(acao.atualizacaoDados(ArgumentMatchers.any(NovoVeiculo.class),ArgumentMatchers.any(Veiculo.class))).thenReturn(veiculo);
 
         ResponseEntity response = service.alterarDadosVeiculo(novoveiculo);
 
@@ -341,7 +359,7 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComErro_AoAlterarDadosVeiculo(){
+    void DeveRetornarOKComErro_AoAlterarDadosVeiculo(){
         // veiculo não consta na base de dados
         Mockito.when(repository.findById(novoveiculo.getRenavamNovoVeiculo())).thenReturn(Optional.empty());
 
@@ -354,8 +372,9 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeNoContent_AoDeletarVeiculo(){
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
+    void DeveRetornarNoContent_AoDeletarVeiculo(){
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(false);
 
         ResponseEntity response = service.deletarVeiculo("44745162039");
 
@@ -364,15 +383,18 @@ class TestVeiculoService extends ApplicationConfigTest {
     }
 
     @Test
-    void DeveRetornarStatusCodeOKComErro_AoDeletarVeiculo(){
+    void DeveRetornarOKComErro_AoDeletarVeiculo(){
         //renavam invalido
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(false);
 
         ResponseEntity response = service.deletarVeiculo("4474516203");
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Informe um renavam válido!",response.getBody());
 
         // veiculo não encontrado
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.empty());
+        Mockito.when(validacao.renavam(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(validacao.veiculoNaoExiste(ArgumentMatchers.anyString())).thenReturn(true);
 
         response = service.deletarVeiculo("44745162039");
 
