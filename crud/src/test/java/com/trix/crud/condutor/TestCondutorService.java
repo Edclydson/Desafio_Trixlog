@@ -3,9 +3,11 @@ package com.trix.crud.condutor;
 import com.trix.crud.ApplicationConfigTest;
 import com.trix.crud.dto.NovoCondutor;
 import com.trix.crud.modelo.Condutor;
-import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
-import com.trix.crud.service.*;
+import com.trix.crud.service.CondutorAcoes;
+import com.trix.crud.service.CondutorService;
+import com.trix.crud.service.CondutorValidacoes;
+import com.trix.crud.service.VeiculoValidacoes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -33,8 +35,6 @@ public class TestCondutorService extends ApplicationConfigTest {
     CondutorAcoes acao;
     @MockBean
     VeiculoValidacoes veiculoValidacoes;
-    @MockBean
-    VeiculoAcoes veiculoAcoes;
     @Autowired
     CondutorService condutorService;
 
@@ -42,13 +42,10 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     private NovoCondutor novoCondutor;
 
-    private Veiculo veiculo;
-
     private List<Condutor> lista = new ArrayList<>();
 
     @BeforeEach
     void setup(){
-
 
         condutor = mock(Condutor.class);
         when(condutor.getNomeCondutor()).thenReturn("Josney");
@@ -59,55 +56,33 @@ public class TestCondutorService extends ApplicationConfigTest {
         when(novoCondutor.getNome()).thenReturn("Zé Bedeu");
         when(novoCondutor.getNumCnh()).thenReturn("79541234658");
 
-        veiculo = Mockito.mock(Veiculo.class);
-
-
     }
 
     @Test
     void DeveRetornarTrue_AoCadastrarNovoCondutor(){
-        novoCondutor = new NovoCondutor();
-        novoCondutor.setNome("Edclydson Sousa");
-        novoCondutor.setNumCnh("77546831291");
-
-        condutor = new Condutor();
-        condutor.setNomeCondutor(novoCondutor.getNome());
-        condutor.setNumeroCnh(novoCondutor.getNumCnh());
-        condutor.setListaDeVeiculos(Collections.emptyList());
-
-        Mockito.when(valida.cnhValida("77546831291")).thenReturn(true);
-        Mockito.when(valida.nomeCondutor("Edclydson Sousa")).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
         Mockito.when(acao.geraCondutor(novoCondutor)).thenReturn(condutor);
         Mockito.when(repository.save(acao.geraCondutor(novoCondutor))).thenReturn(condutor);
 
         boolean resultado = condutorService.cadastraNovoCondutor(novoCondutor);
+
         assertTrue(resultado);
         verify(repository, times(1)).save(ArgumentMatchers.any(Condutor.class));
     }
 
     @Test
     void DeveRetornarFalse_AoCadastrarNovoCondutor(){
-        novoCondutor = new NovoCondutor();
-        novoCondutor.setNome("Edclydson Sousa");
-        novoCondutor.setNumCnh("7546831291");
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
+        //cnh inválida
 
         boolean resultado = condutorService.cadastraNovoCondutor(novoCondutor);
         assertFalse(resultado);
 
-        novoCondutor.setNome("77546831291");
-        novoCondutor.setNumCnh("Edclydson Sousa");
-
-        resultado = condutorService.cadastraNovoCondutor(novoCondutor);
-        assertFalse(resultado);
-
-        novoCondutor.setNome("Edc1yds0n S0usa");
-        novoCondutor.setNumCnh("77546831291");
-
-        resultado = condutorService.cadastraNovoCondutor(novoCondutor);
-        assertFalse(resultado);
-
-        novoCondutor.setNome("Edclydson Sousa");
-        novoCondutor.setNumCnh("775A683l29l");
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(false);
+        //nome invalido
 
         resultado = condutorService.cadastraNovoCondutor(novoCondutor);
         assertFalse(resultado);
@@ -127,14 +102,10 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarSucesso_AoConsultarCondutorPelaCnh(){
-        condutor = new Condutor();
-        condutor.setNomeCondutor(novoCondutor.getNome());
-        condutor.setNumeroCnh(novoCondutor.getNumCnh());
-        condutor.setListaDeVeiculos(Collections.emptyList());
 
         Mockito.when(repository.findById(condutor.getNumeroCnh()))
                 .thenReturn(Optional.of(condutor));
-        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
 
         ResponseEntity resultado = condutorService.consultaCondutorcnh(condutor.getNumeroCnh());
 
@@ -148,25 +119,33 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarFalha_AoConsultarCondutorPelaCnh(){
-        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(false);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(false);
 
         ResponseEntity resultado = condutorService.consultaCondutorcnh(condutor.getNumeroCnh());
 
+        assertNotNull(resultado);
+        assertNotNull(resultado.getBody());
+        assertEquals(HttpStatus.OK,resultado.getStatusCode());
+
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findById(ArgumentMatchers.anyString())).thenReturn(Optional.empty());
+
+        resultado = condutorService.consultaCondutorcnh(condutor.getNumeroCnh());
+
+        assertNotNull(resultado);
+        assertNotNull(resultado.getBody());
+        assertEquals("Condutor não encontrado!",resultado.getBody());
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
     }
 
     @Test
     void DeveRetornarStatusCodeOK_AoAlterarCondutor(){
-        Condutor condutorAlterado = new Condutor();
-        condutorAlterado.setNomeCondutor("Leidson Melo");
-        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
-        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
 
-        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(true);
-        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(true);
-        Mockito.when(acao.alteracaoCondutor(condutorAlterado)).thenReturn(condutorAlterado);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(acao.alteracaoCondutor(condutor)).thenReturn(condutor);
 
-        ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
+        ResponseEntity resultado = condutorService.alteraCondutor(condutor);
 
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         assertEquals("Alterações salvas com sucesso!",resultado.getBody());
@@ -175,22 +154,21 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarStatusCodeOKComErro_AoAlterarCondutor(){
-        Condutor condutorAlterado = new Condutor();
-        condutorAlterado.setNomeCondutor("Leidson Melo");
-        condutorAlterado.setNumeroCnh(condutor.getNumeroCnh());
-        condutorAlterado.setListaDeVeiculos(Collections.emptyList());
 
-        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(false);
-        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(true);
 
-        ResponseEntity resultado = condutorService.alteraCondutor(condutorAlterado);
+        ResponseEntity resultado = condutorService.alteraCondutor(condutor);
+
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
 
-        Mockito.when(valida.nomeCondutor(condutorAlterado.getNomeCondutor())).thenReturn(true);
-        Mockito.when(valida.existe(condutorAlterado.getNumeroCnh())).thenReturn(false);
 
-        resultado = condutorService.alteraCondutor(condutorAlterado);
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(false);
+
+        resultado = condutorService.alteraCondutor(condutor);
+
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
         assertEquals("Houve um problema ao salvar as alterações",resultado.getBody());
     }
@@ -198,8 +176,8 @@ public class TestCondutorService extends ApplicationConfigTest {
     @Test
     void DeveRetornarNoContent_AoExcluirCondutor(){
 
-        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
-        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(true);
 
         ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
 
@@ -210,16 +188,16 @@ public class TestCondutorService extends ApplicationConfigTest {
     @Test
     void DeveRetornarOK_AoExcluirCondutor(){
 
-        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(false);
-        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(true);
 
         ResponseEntity resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
 
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
 
 
-        Mockito.when(valida.cnhValida(condutor.getNumeroCnh())).thenReturn(true);
-        Mockito.when(valida.existe(condutor.getNumeroCnh())).thenReturn(false);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.existe(ArgumentMatchers.anyString())).thenReturn(false);
 
         resultado = condutorService.deletaCondutor(condutor.getNumeroCnh());
 
@@ -228,14 +206,10 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarOK_AoBuscarCondutorPeloNome(){
-        condutor = new Condutor();
-        condutor.setNomeCondutor("Zé Bedeu");
-        condutor.setNumeroCnh("77546831291");
-        condutor.setListaDeVeiculos(Collections.emptyList());
         lista.add(condutor);
 
         Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
-        Mockito.when(repository.findByNomeCondutor(condutor.getNomeCondutor())).thenReturn(lista);
+        Mockito.when(repository.findByNomeCondutor(ArgumentMatchers.anyString())).thenReturn(lista);
 
         ResponseEntity resultado = condutorService.buscaNomeCondutor("Zé Bedeu");
         assertNotNull(resultado);
@@ -265,10 +239,6 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarOKComSucesso_AoAdquirirVeiculo(){
-        condutor = new Condutor();
-        condutor.setNomeCondutor("Edclydson Sousa");
-        condutor.setNumeroCnh("77546831291");
-        condutor.setListaDeVeiculos(Collections.singletonList(veiculo));
 
         Mockito.when(veiculoValidacoes.requisitosAquisicaoVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
         Mockito.when(valida.requisitosAquisicaoVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
@@ -285,10 +255,6 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     @Test
     void DeveRetornarOKComErro_AdquirirVeiculo(){
-        condutor = new Condutor();
-        condutor.setNomeCondutor("Edclydson Sousa");
-        condutor.setNumeroCnh("77546831291");
-        condutor.setListaDeVeiculos(Collections.singletonList(veiculo));
 
         Mockito.when(veiculoValidacoes.requisitosAquisicaoVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
         Mockito.when(valida.requisitosAquisicaoVeiculo(ArgumentMatchers.anyString())).thenReturn(false);
@@ -310,64 +276,58 @@ public class TestCondutorService extends ApplicationConfigTest {
         assertEquals("Para adquerir um veiculo informe os dados corretamente.",resposta.getBody());
 
     }
-//
-//    @Test
-//    void DeveRetornarSucesso_AoliberarVeiculo(){
-//        veiculo = new Veiculo();
-//        veiculo.setRenavam("79541234658");
-//        List<Veiculo> listaVeiculos = new ArrayList<>();
-//        listaVeiculos.add(veiculo);
-//        condutor.setNumeroCnh("77546831291");
-//
-//        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
-//        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(listaVeiculos);
-//        when(veiculoRepository.findById("79541234658")).thenReturn(Optional.of(veiculo));
-//        when(repository.existsById("77546831291")).thenReturn(true);
-//
-//        ResponseEntity resposta = service.liberarVeiculo("79541234658","77546831291");
-//
-//        assertNotNull(resposta);
-//        assertEquals(HttpStatus.OK,resposta.getStatusCode());
-//        assertEquals("O Condutor não tem mais posse do veículo: "+veiculo.getRenavam(),resposta.getBody());
-//        Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Condutor.class));
-//    }
-//
-//    @Test
-//    void DeveRetornarErro_AoLiberaVeiculo(){
-//        condutor.setNumeroCnh("77546831291");
-//
-//        //condutor não existente
-//        when(repository.findById("77546831291")).thenReturn(Optional.of(condutor));
-//        when(repository.existsById("77546831291")).thenReturn(false);
-//
-//        ResponseEntity resposta = service.liberarVeiculo("79541234658","77546831291");
-//
-//        assertNotNull(resposta);
-//        assertEquals(HttpStatus.OK,resposta.getStatusCode());
-//        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
-//
-//        //condutor não possui nenhum veiculo
-//        when(repository.existsById("77546831291")).thenReturn(true);
-//        when(Optional.of(condutor).get().getListaDeVeiculos()).thenReturn(Collections.emptyList());
-//
-//        resposta = service.liberarVeiculo("79541234658","77546831291");
-//
-//        assertNotNull(resposta);
-//        assertEquals(HttpStatus.OK,resposta.getStatusCode());
-//        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
-//
-//        //condutor não possui o veiculo informado
-//        when(veiculoRepository.findById("79541234658")).thenReturn(Optional.of(veiculo));
-//        when(veiculo.getRenavam()).thenReturn("79541234659");
-//
-//        resposta = service.liberarVeiculo("79541234658","77546831291");
-//
-//        assertNotNull(resposta);
-//        assertEquals(HttpStatus.OK,resposta.getStatusCode());
-//        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
-//
-//    }
-//
 
+    @Test
+    void DeveRetornarOKComSucesso_AoliberarVeiculo(){
+
+        Mockito.when(acao.loseProcess(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())).thenReturn(condutor);
+        Mockito.when(valida.temAlgumVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.possuiOVeiculo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+
+        ResponseEntity resposta = condutorService.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("O Condutor não tem mais posse do veículo: 79541234658",resposta.getBody());
+        Mockito.verify(repository).save(ArgumentMatchers.any(Condutor.class));
+    }
+
+    @Test
+    void DeveRetornarOKComErro_AoLiberaVeiculo(){
+        Mockito.when(valida.temAlgumVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.possuiOVeiculo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(false);
+        //chn não valida
+
+        ResponseEntity resposta = condutorService.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+        Mockito.when(valida.temAlgumVeiculo(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.possuiOVeiculo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        //condutor não possui o veiculo
+
+        resposta = condutorService.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+        Mockito.when(valida.temAlgumVeiculo(ArgumentMatchers.anyString())).thenReturn(false);
+        Mockito.when(valida.possuiOVeiculo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(valida.cnhValida(ArgumentMatchers.anyString())).thenReturn(true);
+        //condutor não possui nenhum veiculo
+
+        resposta = condutorService.liberarVeiculo("79541234658","77546831291");
+
+        assertNotNull(resposta);
+        assertEquals(HttpStatus.OK,resposta.getStatusCode());
+        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
+
+    }
 
 }
