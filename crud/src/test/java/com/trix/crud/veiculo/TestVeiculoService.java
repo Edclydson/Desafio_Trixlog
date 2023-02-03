@@ -5,7 +5,9 @@ import com.trix.crud.dto.NovoVeiculo;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.VeiculoRepository;
+import com.trix.crud.service.VeiculoAcoes;
 import com.trix.crud.service.VeiculoService;
+import com.trix.crud.service.VeiculoValidacoes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -29,6 +31,12 @@ class TestVeiculoService extends ApplicationConfigTest {
     @MockBean
     VeiculoRepository repository;
 
+    @MockBean
+    VeiculoValidacoes validacao;
+
+    @MockBean
+    VeiculoAcoes acao;
+
     @Autowired
     VeiculoService service;
 
@@ -37,6 +45,9 @@ class TestVeiculoService extends ApplicationConfigTest {
     private NovoVeiculo novoveiculo;
 
     private Condutor condutor;
+
+    private UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
+
 
     @BeforeEach
     void setup(){
@@ -51,34 +62,37 @@ class TestVeiculoService extends ApplicationConfigTest {
         novoveiculo.setAnoFabricacaoNovoVeiculo("2022");
         novoveiculo.setAnoModeloNovoVeiculo("2023");
         novoveiculo.setChassiNovoVeiculo("76482157359875462");
+
     }
 
     @Test
-    void DeveRetornarStatusCodeCreated_AoCadastrarNovoVeiculo(){
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-        Mockito.when(repository.save(veiculo)).thenReturn(veiculo);
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.empty());
+    void DeveRetornarCreated_AoCadastrarNovoVeiculo(){
+
+        Mockito.when(validacao.requisitosCadastroVeiculo(ArgumentMatchers.anyString(),
+                                                            ArgumentMatchers.anyString(),
+                                                                ArgumentMatchers.anyString())).thenReturn(true);
+
+        Mockito.when(acao.criaVeiculo(ArgumentMatchers.any(NovoVeiculo.class))).thenReturn(veiculo);
 
         ResponseEntity response = service.cadastrarNovoVeiculo(novoveiculo,uriBuilder.path("/cadastraveiculo").build(novoveiculo));
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
-        Mockito.verify(repository, Mockito.times(1)).save(ArgumentMatchers.any(Veiculo.class));
+        Mockito.verify(repository).save(ArgumentMatchers.any(Veiculo.class));
     }
 
     @Test
     void DeveRetornarStatusCodeOKComErro_AoCadastrarNovoVeiculo(){
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
 
-        // cadastro de veiculo já existente
-        Mockito.when(repository.findById("44745162039")).thenReturn(Optional.of(veiculo));
+        Mockito.when(validacao.requisitosCadastroVeiculo(ArgumentMatchers.anyString(),
+                                                            ArgumentMatchers.anyString(),
+                                                                ArgumentMatchers.anyString())).thenReturn(false);
 
         ResponseEntity response = service.cadastrarNovoVeiculo(novoveiculo,uriBuilder.path("/cadastraveiculo").build(novoveiculo));
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Cadastro não realizado!",response.getBody());
-        Mockito.verify(repository, Mockito.times(1)).findById(ArgumentMatchers.anyString());
     }
 
     @Test
