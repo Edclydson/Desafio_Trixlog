@@ -54,11 +54,9 @@ public class VeiculoService implements VeiculoInterface{
     @Override
     public ResponseEntity buscaVeiculoComRenavam(String renavam) {
         if (validacao.renavam(renavam)){
-            if (repository.findById(renavam).isPresent()){
-                return ResponseEntity.ok(repository.findById(renavam));
-            } else {
-                return ResponseEntity.ok("Veículo não encontrado!");
-            }
+            return (!validacao.veiculoNaoExiste(renavam)) ?
+                    ResponseEntity.ok(repository.findById(renavam)):
+                    ResponseEntity.ok("Veículo não encontrado!");
         }
         return ResponseEntity.ok("O renavam " + renavam + " não é válido!");
     }
@@ -68,11 +66,8 @@ public class VeiculoService implements VeiculoInterface{
         ufDaPlaca = ufDaPlaca.toUpperCase();
         if (validacao.uf(ufDaPlaca) && validacao.ufExiste(ufDaPlaca)){
             List<Veiculo> resposta = repository.findByufPlaca(ufDaPlaca);
-            if (!resposta.isEmpty()){
-                return ResponseEntity.ok(resposta);
-            } else {
-                return ResponseEntity.ok("Não encontramos nenhum veículo dessa localidade");
-            }
+            return (!resposta.isEmpty()) ? ResponseEntity.ok(resposta):
+                    ResponseEntity.ok("Não encontramos nenhum veículo dessa localidade");
         }
         return ResponseEntity.ok("Digite uma localidade válida");
     }
@@ -104,8 +99,7 @@ public class VeiculoService implements VeiculoInterface{
     @Override
     public ResponseEntity buscaVeiculosComIntervaloAquisicao(String dataInicial, String dataFinal) {
         List<Veiculo> veiculosIntervalo;
-        if (dataInicial.matches("(\\d{2}-\\d{2}-\\d{4})") && dataFinal.matches("(\\d{2}-\\d{2}-\\d{4})")
-                && validacao.data(dataInicial) && validacao.data(dataFinal)){
+        if (validacao.formatoData(dataInicial, dataFinal) && validacao.data(dataInicial) && validacao.data(dataFinal)){
             veiculosIntervalo = repository.findByintevalo(acao.converteStringtoData(dataInicial), acao.converteStringtoData(dataFinal));
             return !veiculosIntervalo.isEmpty() ? ResponseEntity.ok(veiculosIntervalo) :
                     ResponseEntity.ok("Não há registros de veculos adquiridos no intervalo informado!");
@@ -127,7 +121,7 @@ public class VeiculoService implements VeiculoInterface{
     @Override
     public ResponseEntity deletarVeiculo(String renavam) {
         if (validacao.renavam(renavam)){
-            if (repository.findById(renavam).isPresent()){
+            if (!validacao.veiculoNaoExiste(renavam)){
                 repository.deleteById(renavam);
                 return ResponseEntity.noContent().build();
             }
