@@ -226,6 +226,43 @@ public class TestCondutorService extends ApplicationConfigTest {
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
     }
 
+    @Test
+    void DeveRetornarOK_AoBuscarCondutorPeloNome(){
+        condutor = new Condutor();
+        condutor.setNomeCondutor("Zé Bedeu");
+        condutor.setNumeroCnh("77546831291");
+        condutor.setListaDeVeiculos(Collections.emptyList());
+        lista.add(condutor);
+
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(true);
+        Mockito.when(repository.findByNomeCondutor(condutor.getNomeCondutor())).thenReturn(lista);
+
+        ResponseEntity resultado = condutorService.buscaNomeCondutor("Zé Bedeu");
+        assertNotNull(resultado);
+        assertEquals(lista, resultado.getBody());
+        Mockito.verify(repository, Mockito.times(1)).findByNomeCondutor(ArgumentMatchers.anyString());
+
+
+        Mockito.when(repository.findByNomeCondutorContaining(ArgumentMatchers.anyString())).thenReturn(lista);
+
+        resultado = condutorService.buscaNomeCondutor("Zé");
+        assertNotNull(resultado);
+        assertEquals(lista, resultado.getBody());
+        Mockito.verify(repository, Mockito.times(1)).findByNomeCondutorContaining(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void DeveRetornarOKComErro_AoBuscarCondutorPeloNome(){
+        Mockito.when(valida.nomeCondutor(ArgumentMatchers.anyString())).thenReturn(false);
+        
+        ResponseEntity resultado = condutorService.buscaNomeCondutor("Zé Bede1");
+
+        assertNotNull(resultado);
+        assertEquals(HttpStatus.OK, resultado.getStatusCode());
+        assertEquals("Nome inválido!", resultado.getBody());
+    }
+
+
 //    @Test
 //    void DeveRetornarSucesso_AdquirirVeiculo(){
 //        condutor = new Condutor();
@@ -352,38 +389,7 @@ public class TestCondutorService extends ApplicationConfigTest {
 //        assertEquals("Requisição não foi processada! Tente novamente.",resposta.getBody());
 //
 //    }
-//    @Test
-//    void DeveRetornarStatusCodeOK_AoBuscarCondutorPeloNome(){
-//        condutor = new Condutor();
-//        condutor.setNomeCondutor("Zé Bedeu");
-//        condutor.setNumeroCnh("77546831291");
-//        condutor.setListaDeVeiculos(Collections.emptyList());
-//        lista.add(condutor);
 //
-//        when(repository.findByNomeCondutor(condutor.getNomeCondutor())).thenReturn(lista);
-//
-//        ResponseEntity resultado = service.buscaNomeCondutor("Zé Bedeu");
-//        assertNotNull(resultado);
-//        assertEquals(lista, resultado.getBody());
-//        Mockito.verify(repository, Mockito.times(1)).findByNomeCondutor(ArgumentMatchers.anyString());
-//
-//
-//        when(repository.findByNomeCondutorContaining("Zé")).thenReturn(lista);
-//
-//        resultado = service.buscaNomeCondutor("Zé");
-//        assertNotNull(resultado);
-//        assertEquals(lista, resultado.getBody());
-//        Mockito.verify(repository, Mockito.times(1)).findByNomeCondutorContaining(ArgumentMatchers.anyString());
-//    }
-//
-//    @Test
-//    void DeveRetornarStatusCodeOKComErro_AoBuscarCondutorPeloNome(){
-//        ResponseEntity resultado = service.buscaNomeCondutor("Zé Bede1");
-//
-//        assertNotNull(resultado);
-//        assertEquals(HttpStatus.OK, resultado.getStatusCode());
-//        assertEquals("Nome inválido!", resultado.getBody());
-//    }
-//
+
 
 }
