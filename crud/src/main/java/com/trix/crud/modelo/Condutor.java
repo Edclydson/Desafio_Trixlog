@@ -2,14 +2,11 @@ package com.trix.crud.modelo;
 
 
 import io.swagger.annotations.ApiModel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
 
-import javax.persistence.*;
 import java.util.List;
 
-@Getter
-@Setter
+
 @Entity
 @Table(name="condutores")
 @ApiModel
@@ -20,6 +17,30 @@ public class Condutor{
     private String numeroCnh;
 
     private String nomeCondutor;
+
+    public String getNumeroCnh() {
+        return numeroCnh;
+    }
+
+    public void setNumeroCnh(String numeroCnh) {
+        this.numeroCnh = numeroCnh;
+    }
+
+    public String getNomeCondutor() {
+        return nomeCondutor;
+    }
+
+    public void setNomeCondutor(String nomeCondutor) {
+        this.nomeCondutor = nomeCondutor;
+    }
+
+    public List<Veiculo> getListaDeVeiculos() {
+        return listaDeVeiculos;
+    }
+
+    public void setListaDeVeiculos(List<Veiculo> listaDeVeiculos) {
+        this.listaDeVeiculos = listaDeVeiculos;
+    }
 
     @OneToMany
     private List<Veiculo> listaDeVeiculos;

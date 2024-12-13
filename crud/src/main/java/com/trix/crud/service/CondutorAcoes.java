@@ -1,6 +1,6 @@
 package com.trix.crud.service;
 
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.modelo.Veiculo;
 import com.trix.crud.repository.CondutorRepository;
@@ -22,10 +22,10 @@ public class CondutorAcoes implements AcoesCondutor{
     }
 
     @Override
-    public Condutor geraCondutor(NovoCondutor novoCondutor) {
+    public Condutor geraCondutor(NewDriver newDriver) {
         Condutor condutor = new Condutor();
-        condutor.setNomeCondutor(novoCondutor.getNome());
-        condutor.setNumeroCnh(novoCondutor.getNumCnh());
+        condutor.setNomeCondutor(newDriver.nameDriver());
+        condutor.setNumeroCnh(newDriver.cnhNumber());
         condutor.setListaDeVeiculos(new ArrayList<>());
         return condutor;
     }

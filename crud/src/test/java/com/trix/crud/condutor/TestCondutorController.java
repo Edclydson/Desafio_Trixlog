@@ -2,15 +2,16 @@ package com.trix.crud.condutor;
 
 import com.trix.crud.ApplicationConfigTest;
 import com.trix.crud.controller.CondutorController;
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.service.CondutorService;
+import jakarta.validation.Valid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TestCondutorController extends ApplicationConfigTest{
 
-    @MockBean
+    @Mock
     private CondutorService service;
 
     @Autowired
@@ -35,7 +36,7 @@ class TestCondutorController extends ApplicationConfigTest{
 
     private List<Condutor> lista = new ArrayList<>();
 
-    private NovoCondutor novocondutor;
+    private @Valid NewDriver novocondutor;
 
     @BeforeEach
     void setup(){
@@ -46,9 +47,9 @@ class TestCondutorController extends ApplicationConfigTest{
         Mockito.when(condutor.getNumeroCnh()).thenReturn("78354291376");
         Mockito.when(condutor.getListaDeVeiculos()).thenReturn(Collections.emptyList());
 
-        novocondutor = Mockito.mock(NovoCondutor.class);
-        Mockito.when(novocondutor.getNome()).thenReturn("Biro biro");
-        Mockito.when(novocondutor.getNumCnh()).thenReturn("42587169331");
+        novocondutor = Mockito.mock(NewDriver.class);
+        Mockito.when(novocondutor.nameDriver()).thenReturn("Biro biro");
+        Mockito.when(novocondutor.cnhNumber()).thenReturn("42587169331");
     }
 
     @Test
@@ -133,7 +134,7 @@ class TestCondutorController extends ApplicationConfigTest{
     void DeveRetornarStatusCodeCreated_AoCadastrarNovoCondutor(){
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-        Mockito.when(service.cadastraNovoCondutor(ArgumentMatchers.any(NovoCondutor.class)))
+        Mockito.when(service.cadastraNovoCondutor(ArgumentMatchers.any(NewDriver.class)))
                 .thenReturn(true);
 
         ResponseEntity resultado = controller.cadastrar(novocondutor,uriBuilder);
@@ -141,14 +142,14 @@ class TestCondutorController extends ApplicationConfigTest{
         assertNotNull(resultado.getBody());
         assertEquals("Condutor cadastrado com sucesso!",resultado.getBody());
         assertEquals(HttpStatus.CREATED,resultado.getStatusCode());
-        Mockito.verify(service, Mockito.times(1)).cadastraNovoCondutor(ArgumentMatchers.any(NovoCondutor.class));
+        Mockito.verify(service, Mockito.times(1)).cadastraNovoCondutor(ArgumentMatchers.any(NewDriver.class));
     }
 
     @Test
     void DeveRetornarStatusCodeOK_AoCadastrarNovoCondutor(){
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-        Mockito.when(service.cadastraNovoCondutor(ArgumentMatchers.any(NovoCondutor.class)))
+        Mockito.when(service.cadastraNovoCondutor(ArgumentMatchers.any(NewDriver.class)))
                 .thenReturn(false);
 
         ResponseEntity resultado = controller.cadastrar(novocondutor,uriBuilder);
@@ -158,7 +159,7 @@ class TestCondutorController extends ApplicationConfigTest{
         assertNotEquals(HttpStatus.CREATED,resultado.getStatusCode());
         assertEquals("Cadastro não realizado! Verifique os campos e tente novamente.",resultado.getBody());
         assertEquals(HttpStatus.OK,resultado.getStatusCode());
-        Mockito.verify(service, Mockito.times(1)).cadastraNovoCondutor(ArgumentMatchers.any(NovoCondutor.class));
+        Mockito.verify(service, Mockito.times(1)).cadastraNovoCondutor(ArgumentMatchers.any(NewDriver.class));
     }
 
     @Test

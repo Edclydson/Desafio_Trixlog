@@ -1,6 +1,6 @@
 package com.trix.crud.service.interfaces.condutor;
 
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import org.springframework.http.ResponseEntity;
 
@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CondutorInterface {
 
-    boolean cadastraNovoCondutor(NovoCondutor novoCondutor);
+    boolean cadastraNovoCondutor(NewDriver newDriver);
 
     List<Condutor> consultaTodosCondutores();
 

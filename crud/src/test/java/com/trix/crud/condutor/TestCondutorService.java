@@ -1,7 +1,7 @@
 package com.trix.crud.condutor;
 
 import com.trix.crud.ApplicationConfigTest;
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.repository.CondutorRepository;
 import com.trix.crud.service.CondutorAcoes;
@@ -40,7 +40,7 @@ public class TestCondutorService extends ApplicationConfigTest {
 
     private Condutor condutor;
 
-    private NovoCondutor novoCondutor;
+    private NewDriver novoCondutor;
 
     private List<Condutor> lista = new ArrayList<>();
 
@@ -52,9 +52,9 @@ public class TestCondutorService extends ApplicationConfigTest {
         when(condutor.getNumeroCnh()).thenReturn("77546831291");
         when(condutor.getListaDeVeiculos()).thenReturn(Collections.emptyList());
 
-        novoCondutor = mock(NovoCondutor.class);
-        when(novoCondutor.getNome()).thenReturn("Zé Bedeu");
-        when(novoCondutor.getNumCnh()).thenReturn("79541234658");
+        novoCondutor = mock(NewDriver.class);
+        when(novoCondutor.nameDriver()).thenReturn("Zé Bedeu");
+        when(novoCondutor.cnhNumber()).thenReturn("79541234658");
 
     }
 

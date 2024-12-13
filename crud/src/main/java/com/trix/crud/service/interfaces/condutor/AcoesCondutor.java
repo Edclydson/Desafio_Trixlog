@@ -1,11 +1,11 @@
 package com.trix.crud.service.interfaces.condutor;
 
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 
 public interface AcoesCondutor{
 
-    Condutor geraCondutor(NovoCondutor novoCondutor);
+    Condutor geraCondutor(NewDriver newDriver);
 
     Condutor alteracaoCondutor(Condutor condutorComAlteracao);
 

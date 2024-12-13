@@ -1,9 +1,11 @@
 package com.trix.crud.service;
 
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.repository.CondutorRepository;
 import com.trix.crud.service.interfaces.condutor.CondutorInterface;
+import jakarta.persistence.PersistenceException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +39,20 @@ public class CondutorService implements CondutorInterface{
 
 
     @Override
-    public boolean cadastraNovoCondutor(NovoCondutor novoCondutor){
-        if(valida.cnhValida(novoCondutor.getNumCnh()) && valida.nomeCondutor(novoCondutor.getNome())){
-            repository.save(acao.geraCondutor(novoCondutor));
-            return true;
-        }else{
-            return false;
+    public boolean cadastraNovoCondutor(NewDriver newDriver){
+        try{
+            if(valida.cnhValida(newDriver.cnhNumber()) && valida.nomeCondutor(newDriver.nameDriver())){
+                repository.save(acao.geraCondutor(newDriver));
+                return true;
+            }
         }
+        catch(ValidationException e){
+            throw new ValidationException("Erro de validação!");
+        }
+        catch(PersistenceException e){
+            throw new PersistenceException("Erro ao cadastrar novo condutor!");
+        }
+        return false;
     }
 
     @Override

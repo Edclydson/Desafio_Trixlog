@@ -1,11 +1,12 @@
 package com.trix.crud.controller;
 
 
-import com.trix.crud.dto.NovoCondutor;
+import com.trix.crud.dto.NewDriver;
 import com.trix.crud.modelo.Condutor;
 import com.trix.crud.service.CondutorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,12 +26,16 @@ public class CondutorController {
 
     @PostMapping("/cadastrocondutor")
     @ApiOperation(value = "Realiza o registro de um novo condutor")
-    public ResponseEntity cadastrar(@RequestBody NovoCondutor novoCondutor, UriComponentsBuilder uriBuilder){
-        if(service.cadastraNovoCondutor(novoCondutor)){
-            var uri = uriBuilder.path("/condutores/cadastrocondutor").build(novoCondutor);
-            return ResponseEntity.created(uri).body("Condutor cadastrado com sucesso!");
+    public ResponseEntity<String> cadastrar(@Valid @RequestBody NewDriver newDriver, UriComponentsBuilder uriBuilder){
+        try{
+            if(service.cadastraNovoCondutor(newDriver)){
+                var uri = uriBuilder.path("/condutores/cadastrocondutor").build(newDriver);
+                return ResponseEntity.created(uri).body("Condutor cadastrado com sucesso!");
+            }
+        }catch(Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok("Cadastro não realizado! Verifique os campos e tente novamente.");
+            return ResponseEntity.badRequest().body("Cadastro não realizado! Verifique os campos e tente novamente.");
     }
 
     @GetMapping
