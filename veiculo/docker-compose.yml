@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  veiculo-app:
+    build: .
+    container_name: veiculo-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://veiculo-db:5432/trixlog_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      veiculo-db:
+        condition: service_healthy
+    networks:
+      - trixlog-network
+
+  veiculo-db:
+    image: postgres:15-alpine
+    container_name: veiculo-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=trixlog_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin123
+    volumes:
+      - veiculo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d trixlog_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trixlog-network
+
+networks:
+  trixlog-network:
+    driver: bridge
+
+volumes:
+  veiculo-pgdata:
