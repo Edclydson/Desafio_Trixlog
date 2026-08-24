@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  condutor-api:
+    build: .
+    container_name: condutor_api
+    ports:
+      - "8081:8081"
+    environment:
+      # Sobrescreve as propriedades do application.properties para usar o DB do contêiner
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://condutor-db:5432/trixlog_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      condutor-db:
+        condition: service_healthy
+    networks:
+      - condutor-network
+
+  condutor-db:
+    image: postgres:15-alpine
+    container_name: condutor_db
+    ports:
+      - "5432:5432" # Se 5432 conflitar na máquina host, podemos mudar a porta exposta
+    environment:
+      - POSTGRES_DB=trixlog_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin123
+    volumes:
+      - condutor-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d trixlog_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - condutor-network
+
+networks:
+  condutor-network:
+    driver: bridge
+
+volumes:
+  condutor-pgdata:
